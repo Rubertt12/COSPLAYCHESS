@@ -1,42 +1,12 @@
-♟️ COSPLAY CHESS - Rubra Studios
-O Cosplay Chess é uma engine de batalha desenvolvida especificamente para transformar partidas de xadrez em espetáculos visuais e sonoros em eventos de anime. Diferente de um xadrez comum, aqui cada peça tem uma alma.
+<img src="img/favicon-Photoroom.png" width="35"> COSPLAY CHESS v1.0.0A Engine de Batalha definitiva para palcos de eventos Anime & Geek.🎭 Sobre o ProjetoO Cosplay Chess não é apenas um jogo de xadrez; é uma ferramenta de performance. Desenvolvido pela Rubra Studios, ele permite que organizadores de eventos transformem partidas intelectuais em um show visual, onde cada peça representa um competidor real (Cosplayer).✨ Diferenciais Visuais & FuncionaisCUSTOMIZAÇÃO TOTALUpload de Avatares e Fotos dos Cosplayers em tempo real.Interface inspirada em sistemas de alta tecnologia (Cyberpunk/Glassmorphism).SISTEMA DE ÁUDIO IMERSIVOControle individual de entradas e ataques.Trilha sonora ambiente com suporte a fade-in/out.ARENA DE CONFRONTODuelos invocados automaticamente em capturas.Placar dinâmico para os jogadores.MODO MESTREEdição livre de tabuleiro para apresentações roteirizadas.🛠️ Especificações TécnicasComponenteTecnologiaFinalidadeRuntimeElectron JSExecução nativa Desktop (.exe)DatabaseIndexedDBArmazenamento de assets (Imagens/Áudio)InterfaceHTML5 / CSS3Design responsivo e animações suavesUpdateAutoUpdaterAtualizações automáticas via GitHub🎮 Como Operar (Quick Start)Preparação: No menu inicial, defina a resolução do telão.Configuração: Acesse a sidebar 🏠 e carregue os personagens do dia.Batalha: Clique em INICIAR BATALHA. O sistema cuidará das alternâncias de turno e placares.Conclusão: Ao restar apenas um lado no campo, o sistema celebra o Campeão Final.📥 InstalaçãoBash# Clone o repositório
+git clone https://github.com/seu-usuario/cosplay-chess.git
 
-🚀 Funcionalidades Principais
-Customização On-the-Fly: Troque imagens (cosplayers) e áudios de entrada/ataque de qualquer peça em tempo real através da sidebar.
+# Instale as dependências
+npm install
 
-Arena de Duelo: Quando uma peça captura outra, o sistema abre uma interface de confronto com áudios individuais para cada competidor.
+# Inicie o modo desenvolvimento
+npm start
 
-Sistema de Áudio Dinâmico: Gerenciamento de trilhas ambientes e efeitos sonoros de vitória.
-
-Persistência de Dados: Graças ao uso de IndexedDB, todas as suas configurações de personagens, nomes de jogadores e placares são salvos localmente e não se perdem ao fechar o app.
-
-Modo Mestre (Edição): Permite organizar o tabuleiro livremente, remover peças ou ajustar a posição sem seguir as regras rígidas do xadrez tradicional — ideal para apresentações de palco.
-
-
-
-
-
-🎮 Como Jogar / Operar
-Menu Inicial: Escolha a resolução desejada para o telão do evento.
-
-Configuração: Abra a aba lateral (🏠) e faça o upload das fotos dos cosplayers participantes nas respectivas peças.
-
-Movimentação:
-
-Clique na peça e no destino para mover.
-
-Se o destino estiver ocupado, a Arena de Combate será invocada.
-
-Vitória: O jogo monitora automaticamente o número de peças. O modo extermínio termina quando um lado fica sem combatentes.
-
-
-
-
-📋 Requisitos de Sistema
-OS: Windows 10 ou superior.
-
-Resolução Recomendada: 1280x720 ou superior (ajustável no menu).
-
-👨‍💻 Créditos
-Desenvolvido com paixão pela Rubra Studios.
-Foco total em responsividade e imersão para o público geek.
+# Gere o executável (.exe)
+npm run build
+<p align="center"><img src="https://img.shields.io/badge/Desenvolvido%20por-Rubra%20Studios-red?style=flat-square"><i>"Transformando estratégia em espetáculo."</i></p>
