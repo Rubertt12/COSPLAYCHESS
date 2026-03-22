@@ -1,85 +1,81 @@
-# <p align="center">♟️ COSPLAY CHESS</p>
 <p align="center">
-  <img src="img/favicon-Photoroom.png" width="120">
+  <img src="img/favicon-Photoroom.png" width="150" alt="Rubra Studios Logo">
+</p>
+
+<h1 align="center">⚔️ COSPLAY CHESS ⚔️</h1>
+
+<p align="center">
+  <b>A Próxima Geração de Engines de Batalha para Palcos Geek</b><br>
+  <i>Onde a estratégia do xadrez encontra a imersão dos animes.</i>
 </p>
 
 <p align="center">
-  <b>A Engine de Batalha Definitiva para Eventos Geek</b><br>
-  <i>Desenvolvido por Rubra Studios</i>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Release-v1.0.0-00e5ff?style=for-the-badge" alt="Versão">
-  <img src="https://img.shields.io/badge/Status-Estável-green?style=for-the-badge" alt="Status">
-  <img src="https://img.shields.io/badge/OS-Windows-ff0055?style=for-the-badge&logo=windows" alt="OS">
+  <img src="https://img.shields.io/badge/ENGINE-ELECTRON-00e5ff?style=for-the-badge&logo=electron" alt="Electron">
+  <img src="https://img.shields.io/badge/DB-INDEXEDDB-ff0055?style=for-the-badge&logo=googlechrome" alt="DB">
+  <img src="https://img.shields.io/badge/RELEASE-1.0.0_STABLE-ffd700?style=for-the-badge" alt="Version">
 </p>
 
 ---
 
-## ⚡ O PROJETO
-O **Cosplay Chess** não é apenas um jogo; é um sistema de sustentação para palco. Ele permite que organizadores de eventos de anime carreguem as fotos e vozes dos cosplayers em tempo real, transformando uma partida de xadrez em um duelo cinematográfico digno de um Shonen.
-
-> [!IMPORTANT]
-> **Foco do Sistema:** Imersão, Estética Glassmorphism e Performance nativa em telões de alta resolução.
+### 📥 [BAIXAR ÚLTIMA VERSÃO](https://github.com/) | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
 
 ---
 
-## 🚀 FUNCIONALIDADES "GOD MODE"
+## 💎 A EXPERIÊNCIA RUBRA
 
-### 🎨 Customização Visual (Real-Time)
-* **Avatares Dinâmicos:** Carregue fotos dos competidores diretamente na interface.
-* **Skins de Peças:** Cada peça (`P1` a `K1`) aceita uma imagem única em Base64.
-* **Interface macOS Sequoia Style:** Design limpo, com transparências e efeitos de desfoque.
+O **Cosplay Chess** redefine a interação em palco. Desenvolvido para ser o coração técnico de apresentações de cosplay, ele remove a frieza do xadrez tradicional e entrega uma interface viva, responsiva e totalmente customizável.
 
-### 🔊 Sound Engine Avançada
-* **Arena Audio:** Play/Pause individual para os combatentes durante o duelo.
-* **Ambiente Control:** Suporte a trilhas de fundo, introduções e músicas de vitória.
-* **Volume Master:** Controle centralizado para o técnico de som do evento.
+### 🌑 Estética "Glassmorphism"
+Interface baseada no **macOS Sequoia**, utilizando filtros de desfoque de fundo (*backdrop-filters*), bordas neon sutis e tipografia futurista. Cada janela e menu foi desenhado para não apenas funcionar, mas impressionar o público.
 
-### 💾 Persistência Rubra
-* **Zero Perda de Dados:** O sistema utiliza **IndexedDB** de alta performance. Mesmo que o PC desligue, os personagens e o progresso da partida estarão lá ao reabrir.
+### 🔊 Core de Áudio Inteligente
+* **Dual-Channel Arena:** Controle de áudio independente para o Atacante e o Defensor.
+* **Mood Fade:** Transições suaves de volume entre o modo tabuleiro e o modo arena.
+* **Master Control:** Painel de sistema para o técnico de som ajustar ganhos em tempo real.
 
----
-
-## 🛠️ ARQUITETURA TÉCNICA
-
-| TECNOLOGIA | FUNÇÃO |
-| :--- | :--- |
-| **Electron JS** | Runtime para execução como aplicativo desktop nativo. |
-| **Vanilla JavaScript** | Lógica de movimentação, regras de captura e IA de áudio. |
-| **CSS Glassmorphism** | Estética moderna com filtros de desfoque e bordas neon. |
-| **IPC Bridge** | Comunicação entre o sistema operacional e a interface de jogo. |
+### 🚀 Alta Performance & Persistência
+Utilizamos o **IndexedDB** como motor de armazenamento. Diferentemente de outros apps, o Cosplay Chess armazena imagens e áudios em **Base64** dentro do banco local, garantindo que o app carregue instantaneamente mesmo sem internet.
 
 ---
 
-## 🎮 OPERAÇÃO DO MESTRE (GUIDE)
+## 🛠️ STACK TECNOLÓGICA
 
-1. **BOOT:** Escolha a resolução nativa do telão no menu inicial para garantir a nitidez.
-2. **SETUP:** Use a sidebar `🏠` para subir as fotos dos cosplayers.
-3. **COMBATE:** Ao mover uma peça sobre a outra, a **Arena** surge. Use os controles de áudio para dar emoção ao confronto antes de declarar o vencedor.
-4. **MODO LIVRE:** Ative a `MOVIMENTAÇÃO LIVRE` para coreografias de palco ou ajustes rápidos.
+| Módulo | Tecnologia | Descrição |
+| :--- | :--- | :--- |
+| **Runtime** | `Electron JS` | Container desktop para execução de baixa latência. |
+| **Rendering** | `CSS Grid/Flexbox` | Tabuleiro 100% responsivo para qualquer resolução de telão. |
+| **Logic** | `Vanilla JS` | Motor de regras, sistema de turnos e gerenciamento de DOM. |
+| **Storage** | `IndexedDB` | Persistência de assets pesados (Imagens/MP3). |
+| **Automation**| `IPC Main` | Ponte de comunicação com o sistema operacional (Windows). |
 
 ---
 
-## 📦 COMO COMPILAR
+## 🎮 MANUAL DO OPERADOR
 
-Se você deseja gerar o instalador `.exe`:
+> [!TIP]
+> **Dica de Ouro:** Antes de começar o evento, teste todos os áudios individuais na aba **SISTEMA** para garantir que o som do palco está equalizado.
 
-```bash
-# 1. Instalar dependências
+### 1. Preparação (Pre-Game)
+No **Menu Inicial**, selecione a resolução que casa com o seu telão (ex: 1920x1080). Isso evita que o tabuleiro fique esticado ou pixelado.
+
+### 2. Customização de Peças
+Na sidebar lateral, você pode clicar em qualquer peça para fazer o upload da foto do Cosplayer. O sistema aceita `.png`, `.jpg` e `.webp`.
+
+### 3. A Arena de Combate
+Quando um duelo começa, a música ambiente diminui e o foco vai para os competidores. Use os botões `▶` e `||` para sincronizar as falas dos cosplayers com a ação no palco.
+
+---
+
+## 📦 COMPILAÇÃO & BUILD
+
+Para desenvolvedores que desejam modificar o código da **Rubra Studios**:
+
+```javascript
+// Passo 1: Instale o ambiente
 npm install
 
-# 2. Rodar em modo teste
+// Passo 2: Teste a interface
 npm start
 
-# 3. Gerar o executável final
+// Passo 3: Gere o instalador otimizado
 npm run build
-
-
-<p align="center">
-<img src="https://www.google.com/search?q=https://img.shields.io/badge/RUBRA_STUDIOS-2026-black%3Fstyle%3Dfor-the-badge%26labelColor%3D00e5ff" alt="Rubra Studios">
-</p>
-
-<p align="center">
-<i>"Transformando estratégia em espetáculo."</i>
-</p>
