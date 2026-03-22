@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Cosplay Chess - Rubra Studios</title>
+    <link rel="icon" type="image/png" href="img/favicon-Photoroom.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loader">
+    <div class="loader-content">
+        <img src="img/favicon-Photoroom.png" alt="Rubra Studios Logo" class="loader-logo">
+        <div class="loading-bar"><div class="progress"></div></div>
+        <p>CARREGANDO RUBRA STUDIOS...</p>
+    </div>
+</div>
+
+<div id="menu-toggle" onclick="toggleMenu()">🏠</div>
+
+<aside id="sidebar">
+    <div style="padding: 20px; border-bottom: 1px solid #333;">
+        <h2 style="color:var(--accent);">Cosplay Chess</h2>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px">
+            <label style="font-size: 12px;"><input type="checkbox" id="edit-mode" onchange="renderBoard()"> MODO EDIÇÃO (REMOVER)</label>
+            <label style="font-size: 12px; color: var(--accent); font-weight:bold;"><input type="checkbox" id="free-move"> MOVIMENTAÇÃO LIVRE</label>
+        </div>
+    </div>
+    <div class="tabs">
+        <button id="t-white" class="active" onclick="showTab('white')">BRANCAS</button>
+        <button id="t-black" onclick="showTab('black')">PRETAS</button>
+        <button id="t-sys" onclick="showTab('sys')">SISTEMA</button>
+    </div>
+    
+    <div class="scroll-area" id="list-white"></div>
+    <div class="scroll-area" id="list-black" style="display:none"></div>
+    
+    <div class="scroll-area" id="list-sys" style="display:none">
+        <div class="unit-card">
+            <b>VOLUME MESTRE</b>
+            <input type="range" id="v-master" min="0" max="1" step="0.1" value="1" style="width:100%" oninput="updateMasterVolume()">
+        </div>
+        <div class="unit-card">
+            <b style="color: var(--accent)">🎶 ÁUDIO AMBIENTE</b>
+            <div id="ambient-controls" style="margin-top:10px; display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+        <button class="btn" onclick="rollInitiative()" style="background:#222; color:var(--accent); margin-bottom: 8px;">🎲 SORTEAR INÍCIO</button>
+        <button class="btn" onclick="clearBoardPieces()" style="background:#333; color:#fff; margin-bottom: 8px;">🧹 LIMPAR TABULEIRO</button>
+        <button class="btn" onclick="resetGame()" style="background:var(--danger); color:#fff;">⚠️ RESET TOTAL</button>
+    </div>
+    
+    <div style="padding: 15px; background: #000;">
+        <button class="btn btn-yes" style="width: 100%" onclick="startBattle()">ATIVAR BATALHA</button>
+    </div>
+</aside>
+
+<div class="app-container">
+    <div id="dashboard">
+        <div id="card-B" class="player-card">
+            <div id="img-B" class="p-img" onclick="document.getElementById('f-av-B').click()"></div>
+            <input type="file" id="f-av-B" style="display:none" onchange="upAvatar('B', this)">
+            <input type="text" id="name-B" value="Jogador 1" class="player-name-input" style="color:#029191">
+            <div id="score-B" class="p-score">0</div>
+        </div>
+        <div id="card-P" class="player-card">
+            <div id="img-P" class="p-img" onclick="document.getElementById('f-av-P').click()"></div>
+            <input type="text" id="name-P" value="Jogador 2" class="player-name-input" style="color:var(--danger)">
+            <div id="score-P" class="p-score" style="color:var(--danger)">0</div>
+            <input type="file" id="f-av-P" style="display:none" onchange="upAvatar('P', this)">
+        </div>
+    </div>
+    <main>
+        <div class="board-wrapper">
+            <div id="board"></div>
+        </div>
+    </main>
+</div>
+
+<div id="arena" class="overlay">
+    <div class="arena-content">
+        <div class="arena-fighters">
+            <div class="fighter">
+                <div id="a-img" class="arena-box" style="border-color: var(--accent)"></div>
+                <div class="arena-audio-btns">
+                    <button id="btn-play-L" class="btn" style="background:#004444">▶</button>
+                    <button id="btn-pause-L" class="btn" style="background:#440000">||</button>
+                </div>
+                <button class="btn btn-yes" onclick="finishDuel('B')" style="margin-top:10px">VITÓRIA BRANCAS</button>
+            </div>
+            <div style="font-size: 24px;">⚔️</div>
+            <div class="fighter">
+                <div id="d-img" class="arena-box" style="border-color: var(--danger)"></div>
+                <div class="arena-audio-btns">
+                    <button id="btn-play-R" class="btn" style="background:#004444">▶</button>
+                    <button id="btn-pause-R" class="btn" style="background:#440000">||</button>
+                </div>
+                <button class="btn" onclick="finishDuel('P')" style="background:var(--danger); color:#fff; margin-top:10px">VITÓRIA PRETAS</button>
+            </div>
+        </div>
+        <button class="btn" onclick="closeArena()" style="background:#222; margin-top:10px">CANCELAR</button>
+    </div>
+</div>
+
+<div id="victory-modal" class="overlay">
+    <div class="victory-content">
+        <div class="trophy-wrap">
+            <div id="victory-photo" class="winner-photo-circle"></div>
+        </div>
+        <h1 style="color:var(--gold);">CAMPEÃO!</h1>
+        <p id="winner-name"></p>
+        <button class="btn btn-yes" onclick="location.reload()" style="width:200px; margin-top:20px;">REINICIAR</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

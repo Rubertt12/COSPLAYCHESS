@@ -1,0 +1,22 @@
+{
+  "name": "cosplay-chess-rubra",
+  "version": "1.0.0",
+  "description": "Sistema de Inventário e Batalha Cosplay",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "author": "Rúbertt Ramires - Rubra Studios",
+  "devDependencies": {
+    "electron": "^41.0.3",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.rubra.cosplaychess",
+    "win": {
+      "target": "portable",
+      "icon": "img/Gemini_Generated_Image_wq4abtwq4abtwq4a.png"
+    }
+  }
+}
