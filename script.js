@@ -230,3 +230,19 @@ function resetGame() {
 }
 
 window.addEventListener("load", () => setTimeout(() => document.getElementById("loader").classList.add("loader-hidden"), 2000));
+
+// Importa a comunicação com o Electron (coloque no topo do arquivo)
+const { ipcRenderer } = require('electron');
+
+// Função para alternar tela cheia via botão
+function toggleFullScreen() {
+    ipcRenderer.send('toggle-fullscreen');
+}
+
+// Atalho de teclado (F11) para facilitar no evento
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'F11') {
+        e.preventDefault();
+        toggleFullScreen();
+    }
+});
