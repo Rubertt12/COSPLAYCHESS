@@ -2,6 +2,8 @@
  * Desenvolvido por Rubra Studios
  */
 
+const { ipcRenderer } = require('electron'); // Importação no topo para organização
+
 const peoes = ['P1','P2','P3','P4','P5','P6','P7','P8'];
 const nobres = ['T1','C1','B1','Q1','K1','B2','C2','T2'];
 
@@ -31,7 +33,9 @@ function loadData() {
 }
 
 function setupAmbientUI() {
-    const cont = document.getElementById('ambient-controls'); cont.innerHTML = '';
+    const cont = document.getElementById('ambient-controls'); 
+    if(!cont) return;
+    cont.innerHTML = '';
     ['Ambiente', 'Entrada', 'Intro1', 'Intro2'].forEach(type => {
         if(store.g['snd'+type]) ambientAudios[type].src = store.g['snd'+type];
         ambientAudios[type].loop = (type === 'Ambiente');
@@ -103,58 +107,44 @@ function handleSq(i) {
 }
 
 function openArena() {
-    const idA = store.board[pending.f], idD = store.board[pending.t];
-    document.getElementById('a-img').style.backgroundImage = `url(${store.p[idA]?.img || ''})`;
-    document.getElementById('d-img').style.backgroundImage = `url(${store.p[idD]?.img || ''})`;
+    const idA = store.board[pending.f]; // Peça que moveu (Atacante)
+    const idD = store.board[pending.t]; // Peça que estava no local (Defensor)
+    
+    // Identifica quem é o Branco (B) e quem é o Preto (P)
+    const pecaB = idA.endsWith('_B') ? idA : idD;
+    const pecaP = idA.endsWith('_P') ? idA : idD;
+
+    const dataB = store.p[pecaB];
+    const dataP = store.p[pecaP];
+
+    // --- LADO BRANCO (ESQUERDA) ---
+    const divB = document.getElementById('a-img');
+    divB.innerHTML = ''; // Limpa conteúdo anterior
+    if (dataB?.img) {
+        divB.style.backgroundImage = `url(${dataB.img})`;
+    } else {
+        divB.style.backgroundImage = 'none';
+        divB.innerHTML = `<div class="no-img-arena" style="background:#fff; color:#000;">${dataB?.name || pecaB.split('_')[0]}</div>`;
+    }
+
+    // --- LADO PRETO/VERMELHO (DIREITA) ---
+    const divP = document.getElementById('d-img');
+    divP.innerHTML = ''; // Limpa conteúdo anterior
+    if (dataP?.img) {
+        divP.style.backgroundImage = `url(${dataP.img})`;
+    } else {
+        divP.style.backgroundImage = 'none';
+        divP.innerHTML = `<div class="no-img-arena" style="background:var(--danger); color:#fff;">${dataP?.name || pecaP.split('_')[0]}</div>`;
+    }
+
+    // Áudios (Toca o som de quem ATACA)
     audioAtk.src = store.p[idA]?.snd || ""; 
     audioDef.src = store.p[idD]?.snd || "";
-    document.getElementById('arena').style.display='flex';
+    
+    if(audioAtk.src) audioAtk.play();
+
+    document.getElementById('arena').style.display = 'flex';
 }
-
-function finishDuel(v) {
-    const idA = store.board[pending.f], corA = idA.endsWith('_B') ? 'B' : 'P';
-    v === 'B' ? store.g.killsB++ : store.g.killsP++;
-    
-    if(v === corA) { 
-        store.board[pending.t] = idA; 
-        store.board[pending.f] = null; 
-    } else { 
-        store.board[pending.f] = null; 
-    }
-    
-    document.getElementById('arena').style.display='none';
-    
-    // Lógica de Vitória por Extermínio
-    const pecasBrancas = store.board.filter(p => p && p.endsWith('_B')).length;
-    const pecasPretas = store.board.filter(p => p && p.endsWith('_P')).length;
-
-    if (pecasBrancas === 0 || pecasPretas === 0) {
-        const vencedor = pecasBrancas > 0 ? 'B' : 'P';
-        showVictoryScreen(vencedor);
-    } else {
-        nextTurn();
-    }
-}
-
-function showVictoryScreen(vencedor) {
-    const modal = document.getElementById('victory-modal');
-    const photo = document.getElementById('victory-photo');
-    const nameTxt = document.getElementById('winner-name');
-    
-    const nome = document.getElementById('name-' + vencedor).value;
-    const avatar = store.g['avatar' + vencedor];
-
-    nameTxt.innerText = nome;
-    if (avatar) {
-        photo.style.backgroundImage = `url(${avatar})`;
-        photo.style.backgroundSize = "cover";
-        photo.style.backgroundPosition = "center";
-    }
-
-    modal.style.display = 'flex';
-    if(ambientAudios.Intro1) ambientAudios.Intro1.play();
-}
-
 function renderConfigLists() {
     ['white','black'].forEach(s => {
         const team = s==='white'?'B':'P', cont = document.getElementById('list-'+s);
@@ -231,15 +221,43 @@ function resetGame() {
 
 window.addEventListener("load", () => setTimeout(() => document.getElementById("loader").classList.add("loader-hidden"), 2000));
 
-// Importa a comunicação com o Electron (coloque no topo do arquivo)
-const { ipcRenderer } = require('electron');
+// --- FUNÇÕES DE MENU E SISTEMA (ELECTRON) ---
 
-// Função para alternar tela cheia via botão
+function startGame() {
+    const menu = document.getElementById('main-menu');
+    if (menu) {
+        menu.style.display = 'none';
+        isLive = true; 
+        updateUI();
+        console.log("Duelo Iniciado!");
+    }
+}
+
+function openOptions() {
+    const modal = document.getElementById('options-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeOptions() {
+    const modal = document.getElementById('options-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function applySettings() {
+    const res = document.getElementById('res-select').value;
+    if (res === 'fullscreen') {
+        ipcRenderer.send('toggle-fullscreen');
+    } else {
+        const [width, height] = res.split('x').map(Number);
+        ipcRenderer.send('resize-window', { width, height });
+    }
+    closeOptions();
+}
+
 function toggleFullScreen() {
     ipcRenderer.send('toggle-fullscreen');
 }
 
-// Atalho de teclado (F11) para facilitar no evento
 window.addEventListener('keydown', (e) => {
     if (e.key === 'F11') {
         e.preventDefault();

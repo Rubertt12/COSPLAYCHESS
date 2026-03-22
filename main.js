@@ -12,20 +12,22 @@ function createWindow() {
     minHeight: 600,
     icon: path.join(__dirname, 'img/favicon-Photoroom.png'),
     webPreferences: {
-      nodeIntegration: true,    // Necessário para o ipcRenderer no script.js
-      contextIsolation: false,  // Necessário para acessar o sistema de arquivos
+      nodeIntegration: true,    // Mantido true para seu script.js funcionar
+      contextIsolation: false   // Mantido false para acesso ao IndexedDB
     }
   });
 
+  // Remove menu padrão para visual de jogo
   Menu.setApplicationMenu(null);
+
   win.loadFile('index.html');
 
-  // --- LÓGICA DE TELA CHEIA (FULLSCREEN) ---
+  // --- ESCUTADOR DE TELA CHEIA (IPC) ---
   ipcMain.on('toggle-fullscreen', () => {
-    const isFullScreen = win.isFullScreen();
-    win.setFullScreen(!isFullScreen);
+    win.setFullScreen(!win.isFullScreen());
   });
 
+  // --- LÓGICA DE ATUALIZAÇÃO ---
   autoUpdater.checkForUpdatesAndNotify();
   autoUpdater.on('update-downloaded', () => {
     autoUpdater.quitAndInstall(); 
