@@ -17,7 +17,7 @@
 
 ---
 
-### 📥 [BAIXAR ÚLTIMA VERSÃO][(https://github.com/Rubertt12/)] | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
+### 📥 [BAIXAR ÚLTIMA VERSÃO][(#)] | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
 
 ---
 
