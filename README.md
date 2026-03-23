@@ -17,7 +17,7 @@
 
 ---
 
-### 📥 [BAIXAR ÚLTIMA VERSÃO][(#)] | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
+### 📥 [BAIXAR ÚLTIMA VERSÃO](#) | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
 
 ---
 
