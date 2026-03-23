@@ -66,16 +66,5 @@ Quando um duelo começa, a música ambiente diminui e o foco vai para os competi
 
 ---
 
-## 📦 COMPILAÇÃO & BUILD
 
-Para desenvolvedores que desejam modificar o código da **Rubra Studios**:
 
-```javascript
-// Passo 1: Instale o ambiente
-npm install
-
-// Passo 2: Teste a interface
-npm start
-
-// Passo 3: Gere o instalador otimizado
-npm run build
