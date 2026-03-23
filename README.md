@@ -17,7 +17,7 @@
 
 ---
 
-### 📥 [BAIXAR ÚLTIMA VERSÃO](https://github.com/) | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
+### 📥 [BAIXAR ÚLTIMA VERSÃO](https://github.com/xadrez) | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
 
 ---
 
