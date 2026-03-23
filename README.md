@@ -17,7 +17,7 @@
 
 ---
 
-### 📥 [BAIXAR ÚLTIMA VERSÃO][https://github.com/Rubertt12/COSPLAYCHESS/releases/download/xadrez/cosplay-chess-rubra.Setup.1.0.2.exe] | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
+### 📥 [BAIXAR ÚLTIMA VERSÃO][(https://github.com/Rubertt12/COSPLAYCHESS/releases/download/xadrez/cosplay-chess-rubra.Setup.1.0.2.exe)] | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
 
 ---
 
