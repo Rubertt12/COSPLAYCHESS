@@ -1,126 +1,136 @@
-:root { --bg: #050508; --panel: #0d0d12; --accent: #00e5ff; --danger: #ff0055; --sq-l: #1e1e24; --sq-d: #0a0a0f; --gold: #ffd700; }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body, html { height: 100%; width: 100%; background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('img/_image.webp');background-repeat: no-repeat, repeat, no-repeat; font-family: sans-serif; color: white; overflow: hidden; }
-
-/* Dashboard */
-#dashboard { background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('img/_image.webp'); padding: 10px; display: flex; gap: 10px; backdrop-filter: blur(10px); border-bottom: 1px solid #333; }
-.player-card { flex: 1; display: flex; align-items: center; gap: 10px; padding: 5px; border-radius: 8px; border: 2px solid transparent; }
-.active-B { border-color: #fff; } .active-P { border-color: var(--danger); }
-.p-img { width: 45px; height: 45px; border-radius: 50%; background: #222; background-size: cover; }
-.player-name-input { background: none; border: none; font-weight: bold; width: 80px; }
-
-/* Board */
-main { height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; }
-#board { display: grid; grid-template-columns: repeat(8, 1fr); width: min(90vw, 75vh); height: min(90vw, 75vh); border: 2px solid #333; }
-.sq { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-.l { background: var(--sq-l); } .d { background: var(--sq-d); }
-
-.piece-container { width: 90%; height: 90%; position: relative; }
-.piece { width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat; background-position: center; border-radius: 5px; }
-.no-img { display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; text-align: center; border-radius: 50%; }
-
-/* Sidebar */
-aside { position: fixed; top: 0; left: -310px; width: 300px; height: 100%; background: var(--panel); transition: 0.3s; z-index: 1000; display: flex; flex-direction: column; border-right: 1px solid var(--accent); }
-aside.open { left: 0; }
-.scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
-.unit-card { background: #15151e; padding: 10px; border-radius: 5px; margin-bottom: 10px; font-size: 11px; }
-.name-input { width: 60%; background: #000; color: var(--accent); border: 1px solid #333; padding: 2px 5px; border-radius: 3px; }
-
-/* UI */
-#menu-toggle { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: #222; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 1100; border: 1px solid var(--accent); }
-.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-.arena-box { width: 120px; height: 160px; background: #111; border: 2px solid #333; background-size: cover; border-radius: 10px; }
-.btn { padding: 8px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
-.btn-yes { background: var(--accent); color: #000; }
-.btn-remove { position: absolute; top: -5px; right: -5px; background: red; width: 18px; height: 18px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 12px; cursor: pointer; }
-
-/* Loader */
-#loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
-.loader-hidden { opacity: 0; visibility: hidden; }
-.loading-bar { width: 150px; height: 4px; background: #222; margin-top: 15px; }
-.progress { height: 100%; background: var(--accent); width: 100%; animation: load 2s ease; }
-@keyframes load { from { width: 0; } }
-
-
-
-
-/* CAMADA DO MENU (ISOLAMENTO TOTAL) */
-.overlay-menu {
-    position: fixed;
-    inset: 0; /* Preenche a tela toda */
-    
-    /* FILTRO ESCURO + IMAGEM DE FUNDO */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('img/_image.webp');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 99999;
+/* * Design Modernizado por Rubra Studios 
+ * Foco: Minimalismo e Contraste
+ */
+:root { 
+    --bg: #050505; 
+    --panel: #0d0d10; 
+    --accent: #ffffff; 
+    --danger: #ff0040; 
+    --sq-l: #1a1a1e; /* Cinza claro da imagem */
+    --sq-d: #111114; /* Cinza escuro da imagem */
+    --gold: #ffd700; 
 }
 
-/* CARD DO MENU ESTILO RUBRA */
-.menu-card {
-    background: rgba(15, 15, 20, 0.95);
-    padding: 60px;
-    border-radius: 24px;
-    border: 1px solid var(--accent);
-    text-align: center;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 1), 0 0 20px rgba(0, 229, 255, 0.2);
-    backdrop-filter: blur(20px);
-    max-width: 500px;
-    width: 90%;
-}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 
-/* BOTÕES DO MENU */
-.btn-menu {
-    width: 280px;
-    padding: 16px;
-    background: transparent;
-    border: 1px solid #333;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    margin: 5px 0;
-}
-
-.btn-menu:hover {
-    border-color: var(--accent);
-    background: rgba(0, 229, 255, 0.1);
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
-}
-
-/* GARANTIR QUE O LOADER FIQUE NA FRENTE DO MENU SE PRECISAR */
-#loader { z-index: 100000; }
-
-
-
-
-/* Ajuste para quando a peça não tem foto na Arena */
-.no-img-arena {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    font-weight: 900;
-    text-transform: uppercase;
-    text-align: center;
-    border-radius: 12px;
-    padding: 10px;
-}
-
-/* Garante que o container da imagem limpe o texto interno se houver imagem */
-.arena-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+body, html { 
+    height: 100%; width: 100%; background: var(--bg); 
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: white; 
     overflow: hidden;
 }
+
+/* Container Principal */
+.app-container { 
+    display: flex; 
+    flex-direction: column; 
+    width: 100vw; 
+    height: 100vh; 
+}
+
+/* Dashboard Superior Estilo Foto */
+#dashboard {
+    background: rgba(0,0,0,0.8);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #222;
+    backdrop-filter: blur(10px);
+}
+
+.player-card { 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    padding: 8px 15px;
+    border-radius: 50px;
+    transition: 0.4s;
+}
+
+/* Indicador de Turno Ativo (Sutil) */
+.active-B { background: rgba(255,255,255,0.05); box-shadow: 0 0 15px rgba(255,255,255,0.1); }
+.active-P { background: rgba(255,0,64,0.05); box-shadow: 0 0 15px rgba(255,0,64,0.1); }
+
+.p-img { 
+    width: 50px; height: 50px; 
+    border-radius: 50%; 
+    background-color: #111; 
+    background-size: cover; 
+    border: 2px solid var(--accent);
+}
+#img-P { border-color: var(--danger); }
+
+.player-name { 
+    background: none; border: none; color: #fff; 
+    font-weight: bold; width: 100px; font-size: 14px;
+}
+
+.p-score { font-size: 26px; font-weight: 900; }
+.score-red { color: var(--danger); }
+
+/* Tabuleiro Centralizado */
+main { 
+    flex: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 20px;
+}
+
+.board-wrapper { 
+    position: relative; 
+    padding: 8px; 
+    background: #25252a; 
+    border-radius: 12px; 
+    box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+}
+
+#board { 
+    display: grid; 
+    grid-template-columns: repeat(8, 1fr); 
+    width: min(88vw, 75vh); 
+    height: min(88vw, 75vh); 
+    border-radius: 4px; 
+    overflow: hidden;
+}
+
+.sq { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+.l { background: var(--sq-l); }
+.d { background: var(--sq-d); }
+
+/* Peças Circulares do Design Enviado */
+.piece-container { width: 80%; height: 80%; display: flex; justify-content: center; align-items: center; }
+
+.piece { 
+    width: 100%; height: 100%; 
+    border-radius: 50%; 
+    background-size: 55%; 
+    background-repeat: no-repeat; 
+    background-position: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.piece-white { background-color: #ffffff; }
+.piece-black { background-color: var(--danger); }
+
+/* Sidebar e Menus */
+#sidebar { 
+    position: fixed; right: -320px; width: 320px; height: 100%; 
+    background: var(--panel); z-index: 1000; transition: 0.3s; 
+    border-left: 1px solid #222;
+}
+#sidebar.active { right: 0; }
+
+.btn { 
+    width: 100%; padding: 12px; border-radius: 6px; border: none; 
+    font-weight: bold; cursor: pointer; text-transform: uppercase; 
+    margin-bottom: 10px; transition: 0.2s;
+}
+.btn-yes { background: var(--accent); color: #000; }
+.btn-danger { background: var(--danger); color: #fff; }
+
+/* Loader */
+#loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+.loader-logo { width: 80px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
