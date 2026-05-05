@@ -1,37 +1,26 @@
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
-const { autoUpdater } = require("electron-updater");
+const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 
-let win;
-
 function createWindow() {
-  win = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    icon: path.join(__dirname, 'img/favicon-Photoroom.png'),
+    icon: path.join(__dirname, 'img/favicon-Photoroom.png'), // Caminho do seu ícone
     webPreferences: {
-      nodeIntegration: true,    // Mantido true para seu script.js funcionar
-      contextIsolation: false   // Mantido false para acesso ao IndexedDB
+      nodeIntegration: false, // Segurança
+      contextIsolation: true
     }
   });
 
-  // Remove menu padrão para visual de jogo
+  // Remove a barra de menu padrão (File, Edit, etc) para parecer um jogo
   Menu.setApplicationMenu(null);
 
   win.loadFile('index.html');
 
-  // --- ESCUTADOR DE TELA CHEIA (IPC) ---
-  ipcMain.on('toggle-fullscreen', () => {
-    win.setFullScreen(!win.isFullScreen());
-  });
-
-  // --- LÓGICA DE ATUALIZAÇÃO ---
-  autoUpdater.checkForUpdatesAndNotify();
-  autoUpdater.on('update-downloaded', () => {
-    autoUpdater.quitAndInstall(); 
-  });
+  // Abre em ecrã total se preferir
+  // win.maximize();
 }
 
 app.whenReady().then(createWindow);

@@ -1,11 +1,7 @@
-/* * Cosplay Chess - Engine de Batalha
- * Desenvolvido por Rubra Studios
- */
-
-const { ipcRenderer } = require('electron'); // Importação no topo para organização
-
 const peoes = ['P1','P2','P3','P4','P5','P6','P7','P8'];
 const nobres = ['T1','C1','B1','Q1','K1','B2','C2','T2'];
+const pieceNames = { 'P': 'INFANTARIA', 'T': 'TORRE', 'C': 'CAVALARIA', 'B': 'BISPO', 'Q': 'RAINHA', 'K': 'REI' };
+const pieceIcons = { 'P': 'shield', 'T': 'castle', 'C': 'swords', 'B': 'eye', 'Q': 'crown', 'K': 'target' };
 
 const getInitialBoard = () => [
     ...nobres.map(id => id + '_P'), ...peoes.map(id => id + '_P'),
@@ -13,13 +9,15 @@ const getInitialBoard = () => [
     ...peoes.map(id => id + '_B'), ...nobres.map(id => id + '_B')
 ];
 
-let db, store = { p: {}, g: {killsB:0, killsP:0, avatarB:'', avatarP:''}, board: getInitialBoard() };
-let ambientAudios = { Ambiente: new Audio(), Entrada: new Audio(), Intro1: new Audio(), Intro2: new Audio() };
-let audioAtk = new Audio(), audioDef = new Audio();
-let isLive = false, turn = 'B', sel = null, pending = null;
-let fadeInterval = null;
+let db, store = { 
+    p: {}, g: {killsB:0, killsP:0, avatarB:'', avatarP:''}, 
+    board: getInitialBoard(), graveyard: [] 
+};
 
-// Inicialização do Banco de Dados (IndexedDB)
+let ambientAudios = { Ambiente: new Audio(), Entrada: new Audio(), Intro1: new Audio(), Intro2: new Audio() };
+let fadeIntervals = { Ambiente: null, Entrada: null, Intro1: null, Intro2: null };
+let isLive = false, turn = 'B', sel = null, pending = null, gySel = null;
+
 const req = indexedDB.open("WarEngine_v33_2", 1);
 req.onupgradeneeded = e => e.target.result.createObjectStore("assets");
 req.onsuccess = e => { db = e.target.result; loadData(); };
@@ -28,55 +26,78 @@ function loadData() {
     db.transaction("assets").objectStore("assets").get("all").onsuccess = e => {
         if(e.target.result) store = e.target.result;
         if(!store.board) store.board = getInitialBoard();
-        renderBoard(); updateUI(); renderConfigLists(); setupAmbientUI();
+        if(!store.graveyard) store.graveyard = [];
+        renderBoard(); renderGraveyard(); updateUI(); renderConfigLists(); setupAmbientUI();
     };
 }
 
-function setupAmbientUI() {
-    const cont = document.getElementById('ambient-controls'); 
-    if(!cont) return;
-    cont.innerHTML = '';
-    ['Ambiente', 'Entrada', 'Intro1', 'Intro2'].forEach(type => {
-        if(store.g['snd'+type]) ambientAudios[type].src = store.g['snd'+type];
-        ambientAudios[type].loop = (type === 'Ambiente');
-        const div = document.createElement('div');
-        div.className = 'ambient-unit';
-        div.innerHTML = `<span>${type}</span>
-            <input type="file" onchange="upAmb('${type}', this)">
-            <div style="display:flex; gap:5px;"><button onclick="ambientAudios['${type}'].play()">▶</button><button onclick="ambientAudios['${type}'].pause()">||</button></div>`;
-        cont.appendChild(div);
-    });
+// --- LOGICA DE UPLOAD E PERSISTENCIA ---
+function triggerQuickUpload(id) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        if (file) {
+            const r = new FileReader();
+            r.onload = ev => {
+                if(!store.p[id]) store.p[id] = {};
+                store.p[id].img = ev.target.result;
+                save();
+                renderBoard(); 
+                renderConfigLists();
+            };
+            r.readAsDataURL(file);
+        }
+    };
+    input.click();
 }
 
-function renderBoard() {
-    const b = document.getElementById('board'); 
-    b.innerHTML = '';
-    const edit = document.getElementById('edit-mode').checked;
+// --- UI: MODAL DE IDENTIFICAÇÃO (MODO JOGO) ---
+function showUnitID(id, callback) {
+    const isWhite = id.endsWith('_B');
+    const modal = document.createElement('div');
+    modal.id = "unit-modal-overlay";
+    modal.style = "position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:5000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px); cursor:pointer;";
+    
+    modal.innerHTML = `
+        <div id="unit-modal-content" style="background:#0a0a0c; border:1px solid ${isWhite?'#fff':'#ff0055'}; padding:40px; border-radius:4px; text-align:center; box-shadow: 0 0 30px rgba(0,0,0,0.5); cursor:default;">
+            <div style="width:150px; height:150px; margin:0 auto 20px; background:url(${store.p[id]?.img || ''}) center/cover #111; border:1px solid #333;"></div>
+            <h2 style="letter-spacing:2px; margin-bottom:5px;">${pieceNames[id.charAt(0)]}</h2>
+            <p style="color:#00f2ff; font-size:10px; margin-bottom:25px; opacity:0.7;">UNIT_ID: ${id}</p>
+            <button id="confirm-move" class="btn" style="background:#00f2ff; color:#000; width:100%; padding:12px; font-weight:900; cursor:pointer; border:none; margin-bottom:10px;">INICIAR OPERAÇÃO</button>
+            <button id="cancel-move" class="btn" style="background:transparent; color:#fff; width:100%; padding:8px; font-size:10px; cursor:pointer; border:1px solid #333; opacity:0.5;">ABORTAR</button>
+        </div>
+    `;
 
+    document.body.appendChild(modal);
+
+    modal.onclick = (e) => { if(e.target.id === "unit-modal-overlay") { modal.remove(); sel = null; renderBoard(); } };
+    document.getElementById('confirm-move').onclick = () => { modal.remove(); callback(); };
+    document.getElementById('cancel-move').onclick = () => { modal.remove(); sel = null; renderBoard(); };
+}
+
+// --- TABULEIRO ---
+function renderBoard() {
+    const b = document.getElementById('board'); b.innerHTML = '';
+    const edit = document.getElementById('edit-mode').checked;
     store.board.forEach((id, i) => {
-        const row = Math.floor(i / 8), col = i % 8;
         const sq = document.createElement('div'); 
-        sq.className = `sq ${(row + col) % 2 == 0 ? 'l' : 'd'}`;
+        sq.className = `sq ${(Math.floor(i/8) + i%8) % 2 == 0 ? 'l' : 'd'}`;
         sq.onclick = () => handleSq(i);
         
         if(id) {
             const c = document.createElement('div'); c.className='piece-container';
             const p = document.createElement('div'); p.className='piece';
-            const data = store.p[id];
-            
-            if(data?.img) {
-                p.style.backgroundImage = `url(${data.img})`;
-            } else {
-                p.classList.add('no-img');
-                p.style.backgroundColor = id.endsWith('_B') ? '#fff' : 'var(--danger)';
-                p.style.color = id.endsWith('_B') ? '#000' : '#fff';
-                p.innerText = data?.name || id.split('_')[0];
-            }
-            
+            if(store.p[id]?.img) p.style.backgroundImage = `url(${store.p[id].img})`;
+            else { p.classList.add('no-img'); p.style.backgroundColor = id.endsWith('_B') ? '#fff' : '#ff0055'; p.innerText = id.split('_')[0]; }
+
+            p.onclick = (e) => { if(edit) { e.stopPropagation(); triggerQuickUpload(id); } };
+
             c.appendChild(p);
             if(edit) {
                 const x = document.createElement('div'); x.className='btn-remove'; x.innerHTML='×';
-                x.onclick=(e)=>{e.stopPropagation(); store.board[i]=null; renderBoard(); save();};
+                x.onclick=(e)=>{ e.stopPropagation(); store.graveyard.push(store.board[i]); store.board[i]=null; renderBoard(); renderGraveyard(); save(); };
                 c.appendChild(x);
             }
             sq.appendChild(c);
@@ -86,181 +107,165 @@ function renderBoard() {
 }
 
 function handleSq(i) {
+    if(gySel !== null) {
+        if(!store.board[i]) { store.board[i] = store.graveyard[gySel]; store.graveyard.splice(gySel, 1); gySel = null; renderBoard(); renderGraveyard(); save(); }
+        return;
+    }
+    if(document.getElementById('edit-mode').checked) return;
     if(!isLive) return;
+
     const free = document.getElementById('free-move').checked;
     if(sel === null) {
-        if(store.board[i] && (free || store.board[i].endsWith('_' + turn))) {
-            sel = i; renderBoard();
-            document.getElementById('board').children[i].style.boxShadow = "inset 0 0 15px var(--accent)";
+        const id = store.board[i];
+        if(id && (free || id.endsWith('_' + turn))) {
+            sel = i;
+            showUnitID(id, () => {
+                renderBoard();
+                document.getElementById('board').children[i].style.boxShadow = "inset 0 0 15px #00f2ff";
+            });
         }
     } else {
         if (sel === i) { sel = null; renderBoard(); return; }
-        if (store.board[i] && store.board[i].endsWith(store.board[sel].slice(-2))) { sel = i; renderBoard(); return; }
-        
-        if (store.board[i]) { pending = {f: sel, t: i}; openArena(); }
-        else { 
-            store.board[i] = store.board[sel]; 
-            store.board[sel] = null; 
-            if(!free) nextTurn(); else { sel=null; renderBoard(); save(); } 
+        if (store.board[i] && store.board[i].endsWith(store.board[sel].slice(-2))) { 
+            sel = i; showUnitID(store.board[i], () => { renderBoard(); }); return; 
         }
+        if (store.board[i]) { pending = {f: sel, t: i}; openArena(); }
+        else { store.board[i] = store.board[sel]; store.board[sel] = null; if(!free) nextTurn(); else { sel=null; renderBoard(); save(); } }
     }
 }
 
+// --- ARENA DE COMBATE COM FALLBACK API ---
 function openArena() {
-    const idA = store.board[pending.f]; // Peça que moveu (Atacante)
-    const idD = store.board[pending.t]; // Peça que estava no local (Defensor)
-    
-    // Identifica quem é o Branco (B) e quem é o Preto (P)
-    const pecaB = idA.endsWith('_B') ? idA : idD;
-    const pecaP = idA.endsWith('_P') ? idA : idD;
+    const idA = store.board[pending.f];
+    const idD = store.board[pending.t];
+    const typeA = idA.charAt(0);
+    const typeD = idD.charAt(0);
 
-    const dataB = store.p[pecaB];
-    const dataP = store.p[pecaP];
+    const imgA = document.getElementById('a-img');
+    const imgD = document.getElementById('d-img');
 
-    // --- LADO BRANCO (ESQUERDA) ---
-    const divB = document.getElementById('a-img');
-    divB.innerHTML = ''; // Limpa conteúdo anterior
-    if (dataB?.img) {
-        divB.style.backgroundImage = `url(${dataB.img})`;
-    } else {
-        divB.style.backgroundImage = 'none';
-        divB.innerHTML = `<div class="no-img-arena" style="background:#fff; color:#000;">${dataB?.name || pecaB.split('_')[0]}</div>`;
-    }
+    const setFighter = (el, id, type) => {
+        el.innerHTML = ''; // Limpa ícones anteriores
+        if (store.p[id]?.img) {
+            // Se houver foto salva, aplica como fundo
+            el.style.backgroundImage = `url(${store.p[id].img})`;
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center';
+        } else {
+            // Se não houver foto, usa a API do Lucide
+            el.style.backgroundImage = 'none';
+            const color = id.endsWith('_B') ? '00f2ff' : 'ff0055';
+            el.innerHTML = `<img src="https://lucide.dev/api/icons/${pieceIcons[type]}?color=${color}&size=100" style="width:60%; opacity:0.8;">`;
+        }
+    };
 
-    // --- LADO PRETO/VERMELHO (DIREITA) ---
-    const divP = document.getElementById('d-img');
-    divP.innerHTML = ''; // Limpa conteúdo anterior
-    if (dataP?.img) {
-        divP.style.backgroundImage = `url(${dataP.img})`;
-    } else {
-        divP.style.backgroundImage = 'none';
-        divP.innerHTML = `<div class="no-img-arena" style="background:var(--danger); color:#fff;">${dataP?.name || pecaP.split('_')[0]}</div>`;
-    }
-
-    // Áudios (Toca o som de quem ATACA)
-    audioAtk.src = store.p[idA]?.snd || ""; 
-    audioDef.src = store.p[idD]?.snd || "";
-    
-    if(audioAtk.src) audioAtk.play();
-
+    setFighter(imgA, idA, typeA);
+    setFighter(imgD, idD, typeD);
     document.getElementById('arena').style.display = 'flex';
+}
+function finishDuel(v) {
+    const idA = store.board[pending.f], idD = store.board[pending.t], corA = idA.endsWith('_B') ? 'B' : 'P';
+    v === 'B' ? store.g.killsB++ : store.g.killsP++;
+    if(v === corA) { store.graveyard.push(idD); store.board[pending.t] = idA; store.board[pending.f] = null; } 
+    else { store.graveyard.push(idA); store.board[pending.f] = null; }
+    document.getElementById('arena').style.display='none'; renderGraveyard(); nextTurn();
+}
+
+// --- AUDIO COM FADE ---
+function syncTrackVolume(type) {
+    if (fadeIntervals[type]) return; 
+    ambientAudios[type].volume = parseFloat(document.getElementById(`vol-${type}`)?.value || 0.7) * parseFloat(document.getElementById('v-master').value);
+}
+
+function updateMasterVolume() { Object.keys(ambientAudios).forEach(t => syncTrackVolume(t)); }
+
+function playWithFade(type) {
+    const a = ambientAudios[type];
+    const target = parseFloat(document.getElementById(`vol-${type}`)?.value || 0.7) * parseFloat(document.getElementById('v-master').value);
+    if (fadeIntervals[type]) clearInterval(fadeIntervals[type]);
+    a.play();
+    fadeIntervals[type] = setInterval(() => {
+        if (a.volume < target - 0.02) a.volume += 0.02;
+        else { a.volume = target; clearInterval(fadeIntervals[type]); fadeIntervals[type] = null; }
+    }, 30);
+}
+
+function stopWithFade(type) {
+    const a = ambientAudios[type];
+    if (fadeIntervals[type]) clearInterval(fadeIntervals[type]);
+    fadeIntervals[type] = setInterval(() => {
+        if (a.volume > 0.02) a.volume -= 0.02;
+        else { a.pause(); a.volume = 0; clearInterval(fadeIntervals[type]); fadeIntervals[type] = null; }
+    }, 30);
+}
+
+function setupAmbientUI() {
+    const cont = document.getElementById('ambient-controls'); cont.innerHTML = '';
+    ['Ambiente', 'Entrada', 'Intro1', 'Intro2'].forEach(t => {
+        if(store.g['snd'+t]) ambientAudios[t].src = store.g['snd'+t];
+        ambientAudios[t].loop = (t === 'Ambiente');
+        const d = document.createElement('div'); d.className = "unit-card";
+        d.style = "margin-bottom: 10px; border: 1px solid #222; padding: 10px; background: rgba(255,255,255,0.02);";
+        d.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                <span style="font-size:10px; font-weight:bold; color:#00f2ff">${t.toUpperCase()}</span>
+                <input type="file" id="file-${t}" style="display:none" onchange="upAmb('${t}', this)">
+                <button onclick="document.getElementById('file-${t}').click()" style="background:none; border:1px solid #444; color:white; cursor:pointer; font-size:10px;">📁</button>
+            </div>
+            <input type="range" id="vol-${t}" min="0" max="1" step="0.01" value="0.7" style="width:100%;" oninput="syncTrackVolume('${t}')">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top:8px;">
+                <button onclick="playWithFade('${t}')" style="background:#004d4d; color:white; border:none; padding:4px; font-size:9px; cursor:pointer;">PLAY</button>
+                <button onclick="stopWithFade('${t}')" style="background:#4d001a; color:white; border:none; padding:4px; font-size:9px; cursor:pointer;">STOP</button>
+            </div>
+        `;
+        cont.appendChild(d);
+    });
+}
+
+function upAmb(t, i) {
+    const r = new FileReader();
+    r.onload = e => { store.g['snd'+t] = e.target.result; ambientAudios[t].src = e.target.result; save(); playWithFade(t); };
+    r.readAsDataURL(i.files[0]);
+}
+
+// --- UTILITÁRIOS ---
+function save() { if(db) db.transaction("assets","readwrite").objectStore("assets").put(store,"all"); }
+function nextTurn() { turn = turn==='B'?'P':'B'; sel=null; renderBoard(); updateUI(); save(); }
+function updateUI() {
+    document.getElementById('score-B').innerText = store.g.killsB; document.getElementById('score-P').innerText = store.g.killsP;
+    document.getElementById('img-B').style.backgroundImage = `url(${store.g.avatarB || ''})`; document.getElementById('img-P').style.backgroundImage = `url(${store.g.avatarP || ''})`;
+}
+function renderGraveyard() {
+    const gy = document.getElementById('graveyard'); gy.innerHTML = '';
+    store.graveyard.forEach((id, idx) => {
+        const p = document.createElement('div'); p.className = `gy-piece ${gySel === idx ? 'selected' : ''}`;
+        if(store.p[id]?.img) p.style.backgroundImage = `url(${store.p[id].img})`;
+        else p.style.backgroundColor = id.endsWith('_B') ? '#fff' : '#ff0055';
+        p.onclick = () => { gySel = (gySel === idx) ? null : idx; renderGraveyard(); };
+        gy.appendChild(p);
+    });
 }
 function renderConfigLists() {
     ['white','black'].forEach(s => {
         const team = s==='white'?'B':'P', cont = document.getElementById('list-'+s);
-        cont.innerHTML = `<h3>${s.toUpperCase()}</h3>`;
+        cont.innerHTML = `<h3 style="font-size:12px; color:#555; margin:10px 0;">SQUAD_${s.toUpperCase()}</h3>`;
         [...nobres, ...peoes].forEach(p => {
             const id = `${p}_${team}`; 
-            if(!store.p[id]) store.p[id] = {vol: 0.7, name: ''};
-            const d = document.createElement('div'); d.className = 'unit-card';
-            d.innerHTML = `
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px">
-                    <b>${id}</b>
-                    <input type="text" placeholder="Nome" value="${store.p[id].name || ''}" 
-                        onchange="store.p['${id}'].name=this.value; save(); renderBoard();" class="name-input">
-                </div>
-                IMG: <input type="file" onchange="upPiece('${id}','img',this)">
-                SOM: <input type="file" onchange="upPiece('${id}','snd',this)">
-                VOL: <input type="range" min="0" max="1" step="0.1" value="${store.p[id].vol}" oninput="store.p['${id}'].vol=parseFloat(this.value);save()">`;
+            const d = document.createElement('div'); d.className = 'unit-card'; d.style = "display:flex; align-items:center; gap:10px; margin-bottom:5px; background:rgba(255,255,255,0.02); padding:5px;";
+            d.innerHTML = `<div style="width:25px; height:25px; background:url(${store.p[id]?.img || ''}) center/cover #111;"></div><b style="font-size:9px; flex:1;">${id}</b> <input type="file" style="font-size:8px; width:80px;" onchange="upPiece('${id}',this)">`;
             cont.appendChild(d);
         });
     });
 }
-
-function upPiece(id, t, i) {
-    const r = new FileReader(); 
-    r.onload = e => { store.p[id][t] = e.target.result; save(); renderBoard(); };
-    r.readAsDataURL(i.files[0]);
-}
-
-function upAvatar(s, i) {
-    const r = new FileReader(); 
-    r.onload = e => { store.g['avatar'+s] = e.target.result; save(); updateUI(); };
-    r.readAsDataURL(i.files[0]);
-}
-
-function upAmb(type, input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        store.g['snd' + type] = e.target.result;
-        ambientAudios[type].src = e.target.result;
-        save();
-    };
-    reader.readAsDataURL(file);
-}
-
-function nextTurn() { turn = turn==='B'?'P':'B'; sel=null; renderBoard(); updateUI(); save(); }
-function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
-function startBattle() { isLive=true; toggleMenu(); updateUI(); }
-function closeArena() { document.getElementById('arena').style.display='none'; sel=null; renderBoard(); }
-
+function upPiece(id, i) { const r = new FileReader(); r.onload = e => { if(!store.p[id]) store.p[id]={}; store.p[id].img = e.target.result; save(); renderBoard(); renderConfigLists(); }; r.readAsDataURL(i.files[0]); }
+function upAvatar(s, i) { const r = new FileReader(); r.onload = e => { store.g['avatar'+s] = e.target.result; save(); updateUI(); }; r.readAsDataURL(i.files[0]); }
 function showTab(t) { 
     ['white','black','sys'].forEach(id => document.getElementById('list-'+id).style.display = (id===t?'block':'none'));
     ['t-white','t-black','t-sys'].forEach(id => document.getElementById(id).className = (id==='t-'+t?'active':''));
 }
+function startBattle() { isLive=true; document.getElementById('sidebar').classList.remove('open'); updateUI(); }
+function resetGame() { if(confirm("Reset total?")) { indexedDB.deleteDatabase("WarEngine_v33_2"); location.reload(); } }
+function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
+function closeArena() { document.getElementById('arena').style.display='none'; sel=null; renderBoard(); }
 
-function updateUI() {
-    document.getElementById('score-B').innerText = store.g.killsB; 
-    document.getElementById('score-P').innerText = store.g.killsP;
-    document.getElementById('img-B').style.backgroundImage = `url(${store.g.avatarB})`; 
-    document.getElementById('img-P').style.backgroundImage = `url(${store.g.avatarP})`;
-    document.getElementById('card-B').className = 'player-card' + (turn==='B'&&isLive?' active-B':'');
-    document.getElementById('card-P').className = 'player-card' + (turn==='P'&&isLive?' active-P':'');
-}
-
-function save() { if(db) db.transaction("assets","readwrite").objectStore("assets").put(store,"all"); }
-
-function resetGame() { 
-    if(confirm("Reset total?")) { 
-        store = { p: {}, g: {killsB:0, killsP:0}, board: getInitialBoard() }; 
-        save(); location.reload(); 
-    } 
-}
-
-window.addEventListener("load", () => setTimeout(() => document.getElementById("loader").classList.add("loader-hidden"), 2000));
-
-// --- FUNÇÕES DE MENU E SISTEMA (ELECTRON) ---
-
-function startGame() {
-    const menu = document.getElementById('main-menu');
-    if (menu) {
-        menu.style.display = 'none';
-        isLive = true; 
-        updateUI();
-        console.log("Duelo Iniciado!");
-    }
-}
-
-function openOptions() {
-    const modal = document.getElementById('options-modal');
-    if (modal) modal.style.display = 'flex';
-}
-
-function closeOptions() {
-    const modal = document.getElementById('options-modal');
-    if (modal) modal.style.display = 'none';
-}
-
-function applySettings() {
-    const res = document.getElementById('res-select').value;
-    if (res === 'fullscreen') {
-        ipcRenderer.send('toggle-fullscreen');
-    } else {
-        const [width, height] = res.split('x').map(Number);
-        ipcRenderer.send('resize-window', { width, height });
-    }
-    closeOptions();
-}
-
-function toggleFullScreen() {
-    ipcRenderer.send('toggle-fullscreen');
-}
-
-window.addEventListener('keydown', (e) => {
-    if (e.key === 'F11') {
-        e.preventDefault();
-        toggleFullScreen();
-    }
-});
+window.addEventListener("load", () => setTimeout(() => document.getElementById("loader").style.display='none', 1000));

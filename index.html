@@ -9,39 +9,6 @@
 </head>
 <body>
 
-<div id="main-menu" class="overlay-menu">
-    <div class="menu-card">
-        <img src="img/favicon-Photoroom.png" width="120" class="loader-logo">
-        <h1 style="color:var(--accent); letter-spacing: 8px; margin: 20px 0; font-size: 2.5rem;">COSPLAY CHESS</h1>
-        <p style="color: #666; margin-bottom: 30px;">RUBRA STUDIOS</p>
-        <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
-            <button class="btn-menu" onclick="startGame()">INICIAR BATALHA</button>
-            <button class="btn-menu" onclick="openOptions()">OPÇÕES</button>
-            <button class="btn-menu" onclick="window.close()">SAIR</button>
-        </div>
-        <p style="margin-top: 40px; font-size: 11px; color: #333;">v1.0.2</p>
-    </div>
-</div>
-
-<div id="options-modal" class="overlay-menu" style="display: none;">
-    <div class="menu-card">
-        <h2 style="color:var(--accent); margin-bottom: 25px;">CONFIGURAÇÕES</h2>
-        <div style="margin-bottom: 25px; text-align: left;">
-            <label style="display: block; margin-bottom: 10px; color: #aaa;">RESOLUÇÃO DO TELÃO:</label>
-            <select id="res-select" style="padding: 12px; background: #111; color: white; border: 1px solid var(--accent); width: 100%; border-radius: 5px;">
-                <option value="1280x720">1280 x 720 (HD)</option>
-                <option value="1600x900">1600 x 900</option>
-                <option value="1920x1080">1920 x 1080 (Full HD)</option>
-                <option value="fullscreen">TELA CHEIA (FULLSCREEN)</option>
-            </select>
-        </div>
-        <div style="display:flex; gap:12px; justify-content: center;">
-            <button class="btn-menu" onclick="applySettings()" style="border-color: var(--accent); color: var(--accent);">APLICAR</button>
-            <button class="btn-menu" onclick="closeOptions()">VOLTAR</button>
-        </div>
-    </div>
-</div>
-
 <div id="loader">
     <div class="loader-content">
         <img src="img/favicon-Photoroom.png" alt="Rubra Studios Logo" class="loader-logo">
@@ -56,7 +23,7 @@
     <div style="padding: 20px; border-bottom: 1px solid #333;">
         <h2 style="color:var(--accent);">Cosplay Chess</h2>
         <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px">
-            <label style="font-size: 12px;"><input type="checkbox" id="edit-mode" onchange="renderBoard()"> MODO EDIÇÃO (REMOVER)</label>
+            <label style="font-size: 12px;"><input type="checkbox" id="edit-mode" onchange="renderBoard()"> MODO EDIÇÃO (UPLOAD/REMOVER)</label>
             <label style="font-size: 12px; color: var(--accent); font-weight:bold;"><input type="checkbox" id="free-move"> MOVIMENTAÇÃO LIVRE</label>
         </div>
     </div>
@@ -80,12 +47,11 @@
         </div>
         <button class="btn" onclick="rollInitiative()" style="background:#222; color:var(--accent); margin-bottom: 8px;">🎲 SORTEAR INÍCIO</button>
         <button class="btn" onclick="clearBoardPieces()" style="background:#333; color:#fff; margin-bottom: 8px;">🧹 LIMPAR TABULEIRO</button>
-        <button class="btn" onclick="toggleFullScreen()" style="background:#444; color:#fff; width:100%; margin-bottom: 8px;">🖥️ TELA CHEIA (F11)</button>
         <button class="btn" onclick="resetGame()" style="background:var(--danger); color:#fff;">⚠️ RESET TOTAL</button>
     </div>
     
     <div style="padding: 15px; background: #000;">
-        <button class="btn btn-yes" style="width: 100%" onclick="startGame()">ATIVAR BATALHA</button>
+        <button class="btn btn-yes" style="width: 100%" onclick="startBattle()">ATIVAR BATALHA</button>
     </div>
 </aside>
 
@@ -106,7 +72,15 @@
     </div>
     <main>
         <div class="board-wrapper">
+            <div class="coord-v"><div>8</div><div>7</div><div>6</div><div>5</div><div>4</div><div>3</div><div>2</div><div>1</div></div>
             <div id="board"></div>
+            <div class="coord-h"><div>A</div><div>B</div><div>C</div><div>D</div><div>E</div><div>F</div><div>G</div><div>H</div></div>
+            <input type="file" id="quick-upload" style="display:none" onchange="handleQuickUpload(this)">
+        </div>
+
+        <div class="graveyard-container">
+            <h4 style="color:var(--accent); font-size:10px; text-align:center; margin-bottom:5px;">CEMITÉRIO / RESERVA</h4>
+            <div id="graveyard"></div>
         </div>
     </main>
 </div>
@@ -148,5 +122,6 @@
 </div>
 
 <script src="script.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
