@@ -31,7 +31,6 @@ function loadData() {
     };
 }
 
-// --- LOGICA DE UPLOAD E PERSISTENCIA ---
 function triggerQuickUpload(id) {
     const input = document.createElement('input');
     input.type = 'file';
@@ -53,17 +52,18 @@ function triggerQuickUpload(id) {
     input.click();
 }
 
-// --- UI: MODAL DE IDENTIFICAÇÃO (MODO JOGO) ---
 function showUnitID(id, callback) {
     const isWhite = id.endsWith('_B');
     const modal = document.createElement('div');
     modal.id = "unit-modal-overlay";
     modal.style = "position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:5000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(10px); cursor:pointer;";
     
+    const currentName = store.p[id]?.name || pieceNames[id.charAt(0)];
+
     modal.innerHTML = `
         <div id="unit-modal-content" style="background:#0a0a0c; border:1px solid ${isWhite?'#fff':'#ff0055'}; padding:40px; border-radius:4px; text-align:center; box-shadow: 0 0 30px rgba(0,0,0,0.5); cursor:default;">
-            <div style="width:150px; height:150px; margin:0 auto 20px; background:url(${store.p[id]?.img || ''}) center/cover #111; border:1px solid #333;"></div>
-            <h2 style="letter-spacing:2px; margin-bottom:5px;">${pieceNames[id.charAt(0)]}</h2>
+            <div style="width:150px; height:150px; margin:0 auto 20px; background:url(${store.p[id]?.img || ''}) center/cover #111; border:1px solid #333; border-radius:4px;"></div>
+            <h2 style="letter-spacing:2px; margin-bottom:5px;">${currentName}</h2>
             <p style="color:#00f2ff; font-size:10px; margin-bottom:25px; opacity:0.7;">UNIT_ID: ${id}</p>
             <button id="confirm-move" class="btn" style="background:#00f2ff; color:#000; width:100%; padding:12px; font-weight:900; cursor:pointer; border:none; margin-bottom:10px;">INICIAR OPERAÇÃO</button>
             <button id="cancel-move" class="btn" style="background:transparent; color:#fff; width:100%; padding:8px; font-size:10px; cursor:pointer; border:1px solid #333; opacity:0.5;">ABORTAR</button>
@@ -77,7 +77,6 @@ function showUnitID(id, callback) {
     document.getElementById('cancel-move').onclick = () => { modal.remove(); sel = null; renderBoard(); };
 }
 
-// --- TABULEIRO ---
 function renderBoard() {
     const b = document.getElementById('board'); b.innerHTML = '';
     const edit = document.getElementById('edit-mode').checked;
@@ -90,7 +89,17 @@ function renderBoard() {
             const c = document.createElement('div'); c.className='piece-container';
             const p = document.createElement('div'); p.className='piece';
             if(store.p[id]?.img) p.style.backgroundImage = `url(${store.p[id].img})`;
-            else { p.classList.add('no-img'); p.style.backgroundColor = id.endsWith('_B') ? '#fff' : '#ff0055'; p.innerText = id.split('_')[0]; }
+            else { 
+                p.classList.add('no-img'); 
+                if (id.endsWith('_B')) {
+                    p.style.backgroundColor = '#fff';
+                    p.style.color = '#000'; 
+                } else {
+                    p.style.backgroundColor = '#ff0055';
+                    p.style.color = '#fff';
+                }
+                p.innerText = store.p[id]?.name || id.split('_')[0]; 
+            }
 
             p.onclick = (e) => { if(edit) { e.stopPropagation(); triggerQuickUpload(id); } };
 
@@ -134,35 +143,29 @@ function handleSq(i) {
     }
 }
 
-// --- ARENA DE COMBATE COM FALLBACK API ---
 function openArena() {
     const idA = store.board[pending.f];
     const idD = store.board[pending.t];
     const typeA = idA.charAt(0);
     const typeD = idD.charAt(0);
-
     const imgA = document.getElementById('a-img');
     const imgD = document.getElementById('d-img');
 
     const setFighter = (el, id, type) => {
-        el.innerHTML = ''; // Limpa ícones anteriores
+        el.innerHTML = ''; 
         if (store.p[id]?.img) {
-            // Se houver foto salva, aplica como fundo
             el.style.backgroundImage = `url(${store.p[id].img})`;
-            el.style.backgroundSize = 'cover';
-            el.style.backgroundPosition = 'center';
         } else {
-            // Se não houver foto, usa a API do Lucide
             el.style.backgroundImage = 'none';
             const color = id.endsWith('_B') ? '00f2ff' : 'ff0055';
             el.innerHTML = `<img src="https://lucide.dev/api/icons/${pieceIcons[type]}?color=${color}&size=100" style="width:60%; opacity:0.8;">`;
         }
     };
-
     setFighter(imgA, idA, typeA);
     setFighter(imgD, idD, typeD);
     document.getElementById('arena').style.display = 'flex';
 }
+
 function finishDuel(v) {
     const idA = store.board[pending.f], idD = store.board[pending.t], corA = idA.endsWith('_B') ? 'B' : 'P';
     v === 'B' ? store.g.killsB++ : store.g.killsP++;
@@ -171,12 +174,10 @@ function finishDuel(v) {
     document.getElementById('arena').style.display='none'; renderGraveyard(); nextTurn();
 }
 
-// --- AUDIO COM FADE ---
 function syncTrackVolume(type) {
     if (fadeIntervals[type]) return; 
     ambientAudios[type].volume = parseFloat(document.getElementById(`vol-${type}`)?.value || 0.7) * parseFloat(document.getElementById('v-master').value);
 }
-
 function updateMasterVolume() { Object.keys(ambientAudios).forEach(t => syncTrackVolume(t)); }
 
 function playWithFade(type) {
@@ -205,7 +206,7 @@ function setupAmbientUI() {
         if(store.g['snd'+t]) ambientAudios[t].src = store.g['snd'+t];
         ambientAudios[t].loop = (t === 'Ambiente');
         const d = document.createElement('div'); d.className = "unit-card";
-        d.style = "margin-bottom: 10px; border: 1px solid #222; padding: 10px; background: rgba(255,255,255,0.02);";
+        d.style = "margin-bottom: 5px; border: 1px solid #222; padding: 8px; background: rgba(255,255,255,0.01);";
         d.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                 <span style="font-size:10px; font-weight:bold; color:#00f2ff">${t.toUpperCase()}</span>
@@ -228,13 +229,26 @@ function upAmb(t, i) {
     r.readAsDataURL(i.files[0]);
 }
 
-// --- UTILITÁRIOS ---
 function save() { if(db) db.transaction("assets","readwrite").objectStore("assets").put(store,"all"); }
-function nextTurn() { turn = turn==='B'?'P':'B'; sel=null; renderBoard(); updateUI(); save(); }
-function updateUI() {
-    document.getElementById('score-B').innerText = store.g.killsB; document.getElementById('score-P').innerText = store.g.killsP;
-    document.getElementById('img-B').style.backgroundImage = `url(${store.g.avatarB || ''})`; document.getElementById('img-P').style.backgroundImage = `url(${store.g.avatarP || ''})`;
+
+function nextTurn() { 
+    turn = turn==='B'?'P':'B'; 
+    sel=null; 
+    renderBoard(); 
+    document.getElementById('card-B').className = `player-card ${turn==='B'?'active-B':''}`;
+    document.getElementById('card-P').className = `player-card ${turn==='P'?'active-P':''}`;
+    save(); 
 }
+
+function updateUI() {
+    document.getElementById('score-B').innerText = store.g.killsB; 
+    document.getElementById('score-P').innerText = store.g.killsP;
+    document.getElementById('img-B').style.backgroundImage = `url(${store.g.avatarB || ''})`; 
+    document.getElementById('img-P').style.backgroundImage = `url(${store.g.avatarP || ''})`;
+    document.getElementById('card-B').className = `player-card ${turn==='B'?'active-B':''}`;
+    document.getElementById('card-P').className = `player-card ${turn==='P'?'active-P':''}`;
+}
+
 function renderGraveyard() {
     const gy = document.getElementById('graveyard'); gy.innerHTML = '';
     store.graveyard.forEach((id, idx) => {
@@ -245,18 +259,38 @@ function renderGraveyard() {
         gy.appendChild(p);
     });
 }
+
 function renderConfigLists() {
     ['white','black'].forEach(s => {
         const team = s==='white'?'B':'P', cont = document.getElementById('list-'+s);
-        cont.innerHTML = `<h3 style="font-size:12px; color:#555; margin:10px 0;">SQUAD_${s.toUpperCase()}</h3>`;
+        cont.innerHTML = `<h3 style="font-size:11px; color:#555; margin:10px 0; letter-spacing:1px;">SQUAD_${s.toUpperCase()}</h3>`;
         [...nobres, ...peoes].forEach(p => {
             const id = `${p}_${team}`; 
-            const d = document.createElement('div'); d.className = 'unit-card'; d.style = "display:flex; align-items:center; gap:10px; margin-bottom:5px; background:rgba(255,255,255,0.02); padding:5px;";
-            d.innerHTML = `<div style="width:25px; height:25px; background:url(${store.p[id]?.img || ''}) center/cover #111;"></div><b style="font-size:9px; flex:1;">${id}</b> <input type="file" style="font-size:8px; width:80px;" onchange="upPiece('${id}',this)">`;
+            const currentName = store.p[id]?.name || id;
+            const d = document.createElement('div'); 
+            d.className = 'unit-card';
+            d.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:25px; height:25px; background:url(${store.p[id]?.img || ''}) center/cover #111; border-radius:3px;"></div>
+                    <input type="text" class="edit-piece-name-input" value="${currentName}" onchange="updatePieceName('${id}', this.value)" title="Editar nome visível">
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+                    <span style="font-size:8px; color:#444;">ID: ${id}</span>
+                    <input type="file" style="font-size:8px; width:75px;" onchange="upPiece('${id}',this)">
+                </div>
+            `;
             cont.appendChild(d);
         });
     });
 }
+
+function updatePieceName(id, newName) {
+    if (!store.p[id]) store.p[id] = {};
+    store.p[id].name = newName.toUpperCase().trim();
+    save();
+    renderBoard(); 
+}
+
 function upPiece(id, i) { const r = new FileReader(); r.onload = e => { if(!store.p[id]) store.p[id]={}; store.p[id].img = e.target.result; save(); renderBoard(); renderConfigLists(); }; r.readAsDataURL(i.files[0]); }
 function upAvatar(s, i) { const r = new FileReader(); r.onload = e => { store.g['avatar'+s] = e.target.result; save(); updateUI(); }; r.readAsDataURL(i.files[0]); }
 function showTab(t) { 
@@ -264,8 +298,32 @@ function showTab(t) {
     ['t-white','t-black','t-sys'].forEach(id => document.getElementById(id).className = (id==='t-'+t?'active':''));
 }
 function startBattle() { isLive=true; document.getElementById('sidebar').classList.remove('open'); updateUI(); }
-function resetGame() { if(confirm("Reset total?")) { indexedDB.deleteDatabase("WarEngine_v33_2"); location.reload(); } }
+function resetGame() { if(confirm("Deseja fazer o Reset total da aplicação?")) { indexedDB.deleteDatabase("WarEngine_v33_2"); location.reload(); } }
 function toggleMenu() { document.getElementById('sidebar').classList.toggle('open'); }
 function closeArena() { document.getElementById('arena').style.display='none'; sel=null; renderBoard(); }
 
+function rollInitiative() {
+    const win = Math.random() < 0.5 ? 'BRANCAS' : 'PRETAS';
+    alert(`🎲 Iniciativa sorteada! O jogo começa com as: ${win}`);
+}
+function clearBoardPieces() {
+    if(confirm("Limpar todas as peças do tabuleiro?")) {
+        store.board = Array(64).fill(null);
+        renderBoard();
+        save();
+    }
+}
+
 window.addEventListener("load", () => setTimeout(() => document.getElementById("loader").style.display='none', 1000));
+
+
+// Fecha o menu lateral automaticamente ao clicar fora dele
+window.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menu-toggle');
+    
+    // Se o menu estiver aberto e o clique NÃO for dentro do menu e NÃO for no botão de abrir
+    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('open');
+    }
+});
