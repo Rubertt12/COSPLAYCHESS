@@ -1,31 +1,32 @@
 {
-  "name": "cosplay-chess-rubra",
-  "version": "1.0.2",
+  "name": "cosplay-chess",
+  "version": "1.0.0",
   "description": "Cosplay Chess Battle Engine",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "dist": "electron-builder --win portable"
+  },
+  "keywords": [],
+  "author": "Rubra Studios",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
   },
   "build": {
     "appId": "com.rubrastudios.cosplaychess",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "Rubertt12",
-        "repo": "COSPLAYCHESS"
-      }
-    ],
+    "productName": "Cosplay Chess",
+    "directories": {
+      "output": "dist"
+    },
     "win": {
-      "target": "nsis",
+      "target": "portable",
       "icon": "img/favicon-Photoroom.png"
-    }
-  },
-  "dependencies": {
-    "electron-updater": "^6.8.3"
-  },
-  "devDependencies": {
-    "electron": "^41.0.3",
-    "electron-builder": "^26.8.1"
+    },
+    "files": [
+      "**/*",
+      "!dist/*"
+    ]
   }
 }
