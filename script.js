@@ -1177,6 +1177,10 @@ function newGame() {
 }
 
 function checkForVictory() {
+    // SE ESTIVER NO MODO EDIÇÃO, NÃO VALIDA VITÓRIA
+    const editModeCheckbox = document.getElementById('edit-mode');
+    if (editModeCheckbox && editModeCheckbox.checked) return null;
+
     // Retorna 'B' ou 'P' se houver vencedor, 'DRAW' para empate, ou null
     const bPieces = store.board.filter(id => id && id.endsWith('_B')).length;
     const pPieces = store.board.filter(id => id && id.endsWith('_P')).length;

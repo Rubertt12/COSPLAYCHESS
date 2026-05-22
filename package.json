@@ -11,8 +11,8 @@
   "author": "Rubra Studios",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^30.0.0",
-    "electron-builder": "^24.13.3"
+    "electron": "^42.2.0",
+    "electron-builder": "^26.8.1"
   },
   "build": {
     "appId": "com.rubrastudios.cosplaychess",
@@ -28,5 +28,14 @@
       "**/*",
       "!dist/*"
     ]
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rubertt12/COSPLAYCHESS.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Rubertt12/COSPLAYCHESS/issues"
+  },
+  "homepage": "https://github.com/Rubertt12/COSPLAYCHESS#readme"
 }
