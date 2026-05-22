@@ -17,6 +17,67 @@
     </div>
 </div>
 
+<div id="start-menu" class="overlay show">
+    <div class="start-content">
+        <img src="img/favicon-Photoroom.png" alt="Rubra Studios Logo" class="start-logo">
+        <h1>COSPLAY CHESS</h1>
+        <p>Escolha um tema, valide as regras e inicie a partida com estilo.</p>
+        <div class="theme-grid">
+            <button class="theme-card selected" data-theme="default" onclick="setTheme('default')">
+                <strong>NEON</strong>
+                <span>Visual moderno e futurista</span>
+            </button>
+            <button class="theme-card" data-theme="forest" onclick="setTheme('forest')">
+                <strong>FLORESTA</strong>
+                <span>Verde suave para um clima natural</span>
+            </button>
+            <button class="theme-card" data-theme="fire" onclick="setTheme('fire')">
+                <strong>CHAMA</strong>
+                <span>Contraste quente e energético</span>
+            </button>
+            <button class="theme-card" data-theme="ice" onclick="setTheme('ice')">
+                <strong>GELADO</strong>
+                <span>Frio e limpo para partida tática</span>
+            </button>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; justify-content:center; margin-bottom:12px;">
+            <label style="font-size:12px;">Adversário:</label>
+            <select id="opponent-select" onchange="setMode(this.value)" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
+                <option value="LOCAL">Local (2 jogadores)</option>
+                <option value="AI">Máquina (vs AI)</option>
+            </select>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; justify-content:center; margin-bottom:12px;">
+            <label style="font-size:12px;">Wallpaper:</label>
+            <input type="file" id="wallpaper-file" accept="image/*" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;" onchange="upWallpaper(this)">
+            <button class="btn" onclick="clearWallpaper()" style="background:#222; color:#fff; padding:6px;">Limpar</button>
+        </div>
+        <div style="width:100%; display:flex; flex-direction:column; gap:8px; align-items:center; margin-bottom:12px;">
+            <div style="font-size:12px; color:#ccc;">Ou escolha um preset:</div>
+            <div style="display:flex; gap:8px;">
+                <button id="wp1" class="wall-thumb" onclick="setWallpaperPreset('preset1')" style="width:120px; height:70px; background-color:#111; background-size:cover; border:1px solid #222; border-radius:6px; color:#fff; font-size:10px;">ANIME 1</button>
+                <button id="wp2" class="wall-thumb" onclick="setWallpaperPreset('preset2')" style="width:120px; height:70px; background-color:#111; background-size:cover; border:1px solid #222; border-radius:6px; color:#fff; font-size:10px;">ANIME 2</button>
+                <button id="wp3" class="wall-thumb" onclick="setWallpaperPreset('preset3')" style="width:120px; height:70px; background-color:#111; background-size:cover; border:1px solid #222; border-radius:6px; color:#fff; font-size:10px;">ANIME 3</button>
+                <button id="wp4" class="wall-thumb" onclick="setWallpaperPreset('preset4')" style="width:120px; height:70px; background-color:#111; background-size:cover; border:1px solid #222; border-radius:6px; color:#fff; font-size:10px;">ANIME 4</button>
+            </div>
+            <button class="btn" onclick="randomWallpaperPreset()" style="width:100%; margin-top:8px; background:#1b1b2f; color:#fff;">Wallpaper anime aleatório</button>
+        </div>
+        <div id="ai-options" style="display:none; margin-bottom:12px; text-align:center; gap:8px;">
+            <label style="font-size:12px;">Lado da IA:</label>
+            <select id="ai-side" onchange="setAISide(this.value)" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
+                <option value="P">PRETAS</option>
+                <option value="B">BRANCAS</option>
+            </select>
+            <label style="font-size:12px; margin-left:8px;">Dificuldade:</label>
+            <select id="ai-diff" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
+                <option value="easy">Fácil</option>
+                <option value="normal" selected>Médio</option>
+            </select>
+        </div>
+        <button class="btn btn-yes" onclick="startBattle()" id="start-game-btn">INICIAR JOGO</button>
+    </div>
+</div>
+
 <div id="menu-toggle" onclick="toggleMenu()">🏠</div>
 
 <aside id="sidebar">
@@ -44,6 +105,11 @@
         <div class="unit-card">
             <b style="color: var(--accent); font-size: 11px;">🎶 ÁUDIO AMBIENTE</b>
             <div id="ambient-controls" style="margin-top:10px; display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+        <div class="unit-card">
+            <b style="color: var(--accent); font-size: 11px;">🔍 ZOOM DO TABULEIRO</b>
+            <input type="range" id="board-zoom" min="0.6" max="1.6" step="0.05" value="1" style="width:100%;" oninput="updateBoardZoom(this.value)">
+            <div style="display:flex; justify-content:space-between; font-size:10px; color:#aaa; margin-top:5px;"><span>0.6x</span><span>1x</span><span>1.6x</span></div>
         </div>
         <button class="btn" onclick="rollInitiative()" style="background:#1c1c24; color:var(--accent); margin-bottom: 8px;">🎲 SORTEAR INÍCIO</button>
         <button class="btn" onclick="clearBoardPieces()" style="background:#222; color:#fff; margin-bottom: 8px;">🧹 LIMPAR TABULEIRO</button>
@@ -95,18 +161,20 @@
             <div class="fighter">
                 <div id="a-img" class="arena-box" style="border-color: var(--accent)"></div>
                 <div class="arena-audio-btns">
-                    <button id="btn-play-L" class="btn" style="background:#004444">▶</button>
-                    <button id="btn-pause-L" class="btn" style="background:#440000">||</button>
+                    <button id="btn-play-L" class="btn" style="background:#004444" onclick="playArenaPiece('left')" title="Tocar som da peça atacante">▶</button>
+                    <button id="btn-pause-L" class="btn" style="background:#440000" onclick="pauseArenaPiece('left')" title="Pausar som da peça atacante">||</button>
                 </div>
+                <div id="sound-status-L" class="arena-sound-label">Som: padrão 🎧</div>
                 <button class="btn btn-yes" onclick="finishDuel('B')" style="margin-top:10px; width: 100%;">VITÓRIA BRANCAS</button>
             </div>
             <div style="font-size: 28px;">⚔️</div>
             <div class="fighter">
                 <div id="d-img" class="arena-box" style="border-color: var(--danger)"></div>
                 <div class="arena-audio-btns">
-                    <button id="btn-play-R" class="btn" style="background:#004444">▶</button>
-                    <button id="btn-pause-R" class="btn" style="background:#440000">||</button>
+                    <button id="btn-play-R" class="btn" style="background:#004444" onclick="playArenaPiece('right')" title="Tocar som da peça defensora">▶</button>
+                    <button id="btn-pause-R" class="btn" style="background:#440000" onclick="pauseArenaPiece('right')" title="Pausar som da peça defensora">||</button>
                 </div>
+                <div id="sound-status-R" class="arena-sound-label">Som: padrão 🎧</div>
                 <button class="btn" onclick="finishDuel('P')" style="background:var(--danger); color:#fff; margin-top:10px; width: 100%;">VITÓRIA PRETAS</button>
             </div>
         </div>
@@ -123,7 +191,7 @@
         </div>
         <h1 style="color:var(--gold); letter-spacing: 1px; margin-bottom: 5px;">CAMPEÃO!</h1>
         <p id="winner-name" style="font-weight: bold; font-size: 1.2em; color: #fff;"></p>
-        <button class="btn btn-yes" onclick="location.reload()" style="width:200px; margin-top:25px; padding: 12px; font-weight: 900;">REINICIAR</button>
+        <button class="btn btn-yes" onclick="newGame()" id="victory-newgame" style="width:200px; margin-top:25px; padding: 12px; font-weight: 900;">NOVO JOGO</button>
     </div>
 </div>
 

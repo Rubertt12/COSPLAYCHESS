@@ -5,7 +5,35 @@
     --danger: #ff0055; 
     --sq-l: #1e1e24; 
     --sq-d: #0a0a0f; 
+    --board-border: #111; 
     --gold: #ffd700; 
+}
+body.theme-forest { 
+    --bg: #071203; 
+    --panel: #0c170e; 
+    --accent: #7cd67c; 
+    --danger: #88cc55; 
+    --sq-l: #2d462f; 
+    --sq-d: #1c2917; 
+    --board-border: #2a3624; 
+}
+body.theme-fire { 
+    --bg: #1a0500; 
+    --panel: #2e0c06; 
+    --accent: #ff9f26; 
+    --danger: #ff3b3b; 
+    --sq-l: #5a1908; 
+    --sq-d: #371606; 
+    --board-border: #3d1808; 
+}
+body.theme-ice { 
+    --bg: #08131e; 
+    --panel: #0b1b29; 
+    --accent: #81d8ff; 
+    --danger: #56ccff; 
+    --sq-l: #1c324a; 
+    --sq-d: #0f1d2f; 
+    --board-border: #11243a; 
 }
 
 * { 
@@ -89,6 +117,9 @@ main {
 .board-wrapper { 
     position: relative; 
     padding: 30px; 
+    overflow: visible;
+    transform-origin: center center;
+    transition: transform 0.15s ease;
 }
 
 #board { 
@@ -98,7 +129,7 @@ main {
     /* Força o tabuleiro a ser sempre um quadrado perfeito baseado na altura disponível */
     width: min(70vw, 68vh); 
     height: min(70vw, 68vh); 
-    border: 6px solid #111; 
+    border: 6px solid var(--board-border); 
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
 }
 
@@ -148,6 +179,17 @@ main {
     font-weight: 900; 
     border: 2px solid rgba(0,0,0,0.2);
     text-align: center;
+}
+
+/* Destaque de xeque mate */
+.highlight-mate { 
+    box-shadow: 0 0 0 6px rgba(255,215,0,0.12), inset 0 0 18px rgba(255,215,0,0.08);
+    animation: mate-pulse 1s ease-in-out 0s 2;
+}
+@keyframes mate-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
 }
 
 /* Customização dos Inputs de Nome nas Listas da Sidebar */
@@ -210,6 +252,7 @@ main {
     flex: 1;
     padding-right: 2px;
 }
+.graveyard-container { transition: margin-left 0.15s ease; }
 
 .gy-piece {
     width: 32px; 
@@ -278,6 +321,18 @@ aside.open { left: 0; }
 
 /* --- OVERLAYS / ARENA --- */
 .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+.overlay.show { display: flex; }
+
+.start-content { width: min(520px, 92vw); background: rgba(10,10,14,0.98); border: 1px solid rgba(255,255,255,0.08); padding: 30px; border-radius: 18px; text-align: center; color: white; box-shadow: 0 0 40px rgba(0,0,0,0.4); }
+.start-logo { width: 70px; margin-bottom: 14px; }
+.start-content h1 { margin: 0 0 10px; font-size: 2rem; letter-spacing: 3px; }
+.start-content p { margin: 0 auto 24px; max-width: 420px; font-size: 0.95rem; color: #b8c2d3; }
+.theme-grid { display: grid; grid-template-columns: repeat(2, minmax(120px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.theme-card { border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 18px 14px; background: rgba(255,255,255,0.04); color: #f5f5f5; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+.theme-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.theme-card.selected { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0,229,255,0.12); }
+.theme-card strong { display: block; font-size: 0.95rem; margin-bottom: 6px; }
+.theme-card span { display: block; font-size: 0.82rem; color: #a2afc7; }
 
 .btn { padding: 10px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
 .btn-yes { background: var(--accent); color: #000; }
@@ -296,6 +351,8 @@ input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: 
 .arena-box img { display: block; max-width: 100%; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.4)); }
 .arena-audio-btns { display: flex; gap: 5px; width: 100%; }
 .arena-audio-btns button { flex: 1; }
+.arena-sound-label { margin-top: 8px; font-size: 11px; color: #89e3ff; text-align: center; letter-spacing: 0.6px; }
+.btn.sound-active { box-shadow: 0 0 12px rgba(0, 229, 255, 0.75); border: 1px solid rgba(0, 229, 255, 0.8); }
 
 .victory-content { text-align: center; background: #09090e; border: 1px solid var(--gold); padding: 40px; border-radius: 8px; width: 350px; box-shadow: 0 0 30px rgba(255,215,0,0.2); }
 .trophy-wrap { position: relative; margin: -80px auto 20px; width: 100px; height: 100px; }
