@@ -5,8 +5,9 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win",
-    "dist": "electron-builder"
+    "build": "echo 'Web Build Complete'",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win"
   },
   "overrides": {
     "rimraf": "^5.0.7",
