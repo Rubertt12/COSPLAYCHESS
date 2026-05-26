@@ -17,7 +17,7 @@
 
 ---
 
-### 📥 [BAIXAR ÚLTIMA VERSÃO](https://github.com/Rubertt12/COSPLAYCHESS/releases/download/v1.0.2/Cosplay.Chess.Setup.1.0.2.exe) | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
+### 📥 [BAIXAR ÚLTIMA VERSÃO](https://github.com/Rubertt12/COSPLAYCHESS/releases/download/xadrez/Cosplay.Chess.Setup.1.0.2.exe) | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
 
 ---
 
