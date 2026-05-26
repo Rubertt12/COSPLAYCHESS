@@ -22,7 +22,8 @@
     },
     "win": {
       "target": [
-        "nsis"
+        "nsis",
+        "portable"
       ],
       "icon": "img/favicon-Photoroom.png"
     },
