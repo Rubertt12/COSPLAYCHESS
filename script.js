@@ -28,94 +28,58 @@ let lastCapturePos = null;
 
 // Anime-themed SVG presets (encoded at runtime)
 const wallpaperSVGS = {
-    preset1: `
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'>
+    kuroshitsuji: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+            <rect width="100%" height="100%" fill="#0a0505" />
             <defs>
-                <linearGradient id='g1' x1='0' x2='0' y1='0' y2='1'>
-                    <stop offset='0' stop-color='%23ffd1e6'/>
-                    <stop offset='1' stop-color='%23ff9ac1'/>
-                </linearGradient>
+                <radialGradient id="grad1" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" style="stop-color:#3d0000;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#050000;stop-opacity:1" />
+                </radialGradient>
             </defs>
-            <rect width='100%' height='100%' fill='url(%23g1)' />
-            <g fill='%23fff' opacity='0.8'>
-                <ellipse cx='260' cy='200' rx='70' ry='40' />
-                <ellipse cx='520' cy='120' rx='48' ry='30' />
-                <ellipse cx='1100' cy='300' rx='38' ry='24' />
-            </g>
-            <g fill='%23fff' opacity='0.6' transform='translate(100,500)'>
-                <path d='M0,0 C40,-20 80,-20 120,0 C80,20 40,20 0,0 Z' />
-                <path d='M160,0 C200,-24 240,-24 280,0 C240,24 200,24 160,0 Z' transform='translate(120,-10)' />
-            </g>
+            <rect width="100%" height="100%" fill="url(#grad1)" opacity="0.6" />
+            <path d="M800,450 m-200,0 a200,200 0 1,0 400,0 a200,200 0 1,0 -400,0" fill="none" stroke="#4a0000" stroke-width="2" opacity="0.3" stroke-dasharray="10,5" />
+            <circle cx="800" cy="450" r="150" fill="none" stroke="#2a0000" stroke-width="1" opacity="0.2" />
+            <text x="50%" y="90%" fill="#ffffff" font-family="serif" font-size="20" text-anchor="middle" opacity="0.1" letter-spacing="10">SEBASTIAN MICHAELIS</text>
         </svg>
     `,
-    preset2: `
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'>
-            <defs>
-                <linearGradient id='g2' x1='0' x2='0' y1='0' y2='1'>
-                    <stop offset='0' stop-color='%2300182b' />
-                    <stop offset='1' stop-color='%23001218' />
-                </linearGradient>
-            </defs>
-            <rect width='100%' height='100%' fill='url(%23g2)' />
-            <g fill='%23ff6ef3' opacity='0.06'>
-                <rect x='0' y='300' width='1600' height='180' />
+    naruto: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+            <rect width="100%" height="100%" fill="#2b1a0a" />
+            <circle cx="800" cy="450" r="400" fill="#ff9100" opacity="0.05" />
+            <g transform="translate(800,450) scale(2)" opacity="0.1">
+                <path d="M0,0 C20,-20 40,0 20,20 C0,40 -40,20 -20,0 C0,-20 20,-10 10,0" fill="none" stroke="#ff4d00" stroke-width="5" stroke-linecap="round" />
             </g>
-            <g fill='%23000' transform='translate(0,380)'>
-                <rect x='40' y='40' width='80' height='180' />
-                <rect x='160' y='80' width='120' height='140' />
-                <rect x='320' y='20' width='200' height='200' />
-                <rect x='580' y='60' width='140' height='160' />
-                <rect x='760' y='30' width='160' height='190' />
-                <rect x='980' y='90' width='120' height='120' />
-                <rect x='1160' y='40' width='180' height='170' />
-            </g>
-            <circle cx='1200' cy='200' r='80' fill='%23ffbf69' opacity='0.9' />
+            <path d="M0,700 Q800,600 1600,700 L1600,900 L0,900 Z" fill="#1a0f05" />
+            <text x="80%" y="20%" fill="#ff9100" font-family="sans-serif" font-weight="bold" font-size="120" opacity="0.03">NARUTO</text>
         </svg>
     `,
-    preset3: `
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'>
-            <defs>
-                <linearGradient id='g3' x1='0' x2='0' y1='0' y2='1'>
-                    <stop offset='0' stop-color='%23cfe9ff'/>
-                    <stop offset='1' stop-color='%23e8f7ff'/>
-                </linearGradient>
-            </defs>
-            <rect width='100%' height='100%' fill='url(%23g3)' />
-            <g fill='%23fff' opacity='0.9'>
-                <ellipse cx='300' cy='200' rx='180' ry='60' />
-                <ellipse cx='520' cy='220' rx='140' ry='48' />
-                <ellipse cx='980' cy='180' rx='200' ry='70' />
+    bleach: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+            <rect width="100%" height="100%" fill="#050a14" />
+            <g opacity="0.1">
+                <path d="M400,100 L1200,800 M1200,100 L400,800" stroke="#ffffff" stroke-width="1" />
             </g>
-            <g fill='%23ffd1e6' opacity='0.6'>
-                <circle cx='1300' cy='140' r='8' />
-                <circle cx='1350' cy='200' r='6' />
-                <circle cx='1220' cy='240' r='5' />
-            </g>
+            <circle cx="800" cy="450" r="300" fill="none" stroke="#00f2ff" stroke-width="1" opacity="0.1" />
+            <path d="M750,450 L800,400 L850,450 L800,500 Z" fill="#ffffff" opacity="0.05" />
+            <text x="50%" y="50%" fill="#ffffff" font-family="sans-serif" font-weight="bold" font-size="200" text-anchor="middle" opacity="0.02">BANKAI</text>
         </svg>
     `,
-    preset4: `
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'>
-            <defs>
-                <linearGradient id='g4' x1='0' x2='0' y1='0' y2='1'>
-                    <stop offset='0' stop-color='%23ffb37a'/>
-                    <stop offset='1' stop-color='%23ff7aa3'/>
-                </linearGradient>
-            </defs>
-            <rect width='100%' height='100%' fill='url(%23g4)' />
-            <g fill='%2300182b' opacity='0.9'>
-                <rect x='0' y='520' width='1600' height='380' />
+    onepiece: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+            <rect width="100%" height="100%" fill="#001a33" />
+            <path d="M0,450 Q400,400 800,450 T1600,450 L1600,900 L0,900 Z" fill="#000d1a" />
+            <g transform="translate(800,300) scale(0.5)" opacity="0.1" fill="#ffffff">
+                <circle cx="0" cy="0" r="100" />
+                <rect x="-120" y="-10" width="240" height="20" rx="10" transform="rotate(45)" />
+                <rect x="-120" y="-10" width="240" height="20" rx="10" transform="rotate(-45)" />
             </g>
-            <circle cx='800' cy='380' r='120' fill='%23ffd166' opacity='0.95' />
-            <g fill='%23000000' opacity='0.08'>
-                <rect x='0' y='370' width='1600' height='6' />
-                <rect x='0' y='390' width='1600' height='6' />
-                <rect x='0' y='410' width='1600' height='6' />
-            </g>
+            <text x="50%" y="85%" fill="#ffcc00" font-family="sans-serif" font-weight="bold" font-size="24" text-anchor="middle" opacity="0.2" letter-spacing="15">GRAND LINE</text>
         </svg>
     `
 };
 
-function presetDataUrl(key) { return 'data:image/svg+xml;utf8,' + encodeURIComponent(wallpaperSVGS[key] || ''); }
+function presetDataUrl(key) { return 'data:image/svg+xml,' + encodeURIComponent(wallpaperSVGS[key] || ''); }
 
 const req = indexedDB.open("WarEngine_v33_2", 1);
 req.onupgradeneeded = e => e.target.result.createObjectStore("assets");
@@ -124,6 +88,7 @@ req.onsuccess = e => { db = e.target.result; loadData(); };
 function loadData() {
     db.transaction("assets").objectStore("assets").get("all").onsuccess = e => {
         if(e.target.result) store = e.target.result;
+        // Fallbacks para garantir que o objeto store tenha tudo
         if(!store.board) store.board = getInitialBoard();
         if(!store.graveyard) store.graveyard = [];
         if(!store.g.zoomBoard) store.g.zoomBoard = 1;
@@ -138,7 +103,7 @@ function loadData() {
         if (!store.g.wallpaper) randomWallpaperPreset(true);
         applyWallpaper(store.g.wallpaper);
         populateWallpaperThumbnails();
-        renderBoard(); renderGraveyard(); updateUI(); renderConfigLists(); setupAmbientUI(); updateBoardZoom(store.g.zoomBoard);
+        renderBoard(); renderGraveyard(); updateUI(); renderConfigLists(); setupAmbientUI(); updateBoardZoom(store.g.zoomBoard); updateWallpaperSelectionUI();
     };
 }
 
@@ -279,15 +244,14 @@ function clearWallpaper() {
 
 function setWallpaperPreset(urlOrKey) {
     if (!urlOrKey) return;
-    let url = urlOrKey;
-    if (urlOrKey === 'random') {
-        randomWallpaperPreset();
-        return;
+    if (urlOrKey === 'random') return randomWallpaperPreset();
+    if (wallpaperSVGS[urlOrKey]) {
+        const url = presetDataUrl(urlOrKey);
+        store.g.wallpaper = url;
+        applyWallpaper(url);
+        updateWallpaperSelectionUI();
+        save();
     }
-    if (wallpaperSVGS[urlOrKey]) url = presetDataUrl(urlOrKey);
-    store.g.wallpaper = url;
-    applyWallpaper(url);
-    save();
 }
 
 function randomWallpaperPreset(setOnLoad = false) {
@@ -300,14 +264,31 @@ function randomWallpaperPreset(setOnLoad = false) {
 }
 
 function populateWallpaperThumbnails() {
-    const presets = ['preset1','preset2','preset3','preset4'];
-    presets.forEach((key, idx) => {
+    const keys = Object.keys(wallpaperSVGS);
+    keys.forEach((key, idx) => {
         const btn = document.getElementById('wp' + (idx + 1));
         if (!btn) return;
-        btn.style.backgroundImage = `url(${presetDataUrl(key)})`;
-        btn.style.backgroundColor = '#111';
-        btn.style.color = '#fff';
-        btn.innerText = `ANIME ${idx + 1}`;
+        btn.classList.add('wp-thumbnail');
+        btn.style.backgroundImage = `url("${presetDataUrl(key)}")`;
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.fontSize = '10px';
+        btn.style.fontWeight = '900';
+        btn.style.color = 'white';
+        btn.style.textShadow = '0 2px 10px rgba(0,0,0,0.8)';
+        btn.style.border = '1px solid rgba(255,255,255,0.1)';
+        btn.innerText = key.toUpperCase();
+        // Adiciona o evento de clique caso não esteja no HTML
+        btn.onclick = () => setWallpaperPreset(key);
+    });
+}
+
+function updateWallpaperSelectionUI() {
+    const keys = Object.keys(wallpaperSVGS);
+    keys.forEach((key, idx) => {
+        const btn = document.getElementById('wp' + (idx + 1));
+        if (btn) btn.classList.toggle('selected-wp', store.g.wallpaper === presetDataUrl(key));
     });
 }
 
@@ -1238,7 +1219,7 @@ function checkForVictory() {
 function renderConfigLists() {
     ['white','black'].forEach(s => {
         const team = s==='white'?'B':'P', cont = document.getElementById('list-'+s);
-        cont.innerHTML = `<h3 style="font-size:11px; color:#555; margin:10px 0; letter-spacing:1px;">SQUAD_${s.toUpperCase()}</h3>`;
+            cont.innerHTML = `<h3 style="font-size:10px; color:var(--accent); margin:15px 0 10px; letter-spacing:3px; font-weight:900; opacity:0.6; padding-left:5px;">SQUAD_${s.toUpperCase()}</h3>`;
         [...nobres, ...peoes].forEach(p => {
             const id = `${p}_${team}`; 
             const currentName = store.p[id]?.name || id;
@@ -1246,26 +1227,43 @@ function renderConfigLists() {
             const volValue = store.p[id]?.volume ?? 0.8;
             const d = document.createElement('div'); 
             d.className = 'unit-card';
+                d.style.padding = "12px";
             d.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:25px; height:25px; background:url(${store.p[id]?.img || ''}) center/cover #111; border-radius:3px;"></div>
-                    <input type="text" class="edit-piece-name-input" value="${currentName}" onchange="updatePieceName('${id}', this.value)" title="Editar nome visível">
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:4px; font-size:8px; color:#aaa;">
-                    <span>ID: ${id}</span>
-                    <span>${hasSound ? '🎵 ÁUDIO definido' : '🎧 Sem áudio'}</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; gap:4px;">
-                    <input type="file" accept="image/*" style="font-size:8px; width:75px;" onchange="upPiece('${id}',this)">
-                    <input type="file" accept="audio/*" style="font-size:8px; width:75px;" onchange="upPieceSound('${id}',this)">
-                </div>
-                <div style="display:flex; align-items:center; gap:8px; margin-top:6px; font-size:10px;">
-                    <label style="flex:1; color:#ccc;">Volume</label>
-                    <input type="range" min="0" max="1" step="0.05" value="${volValue}" style="flex:2;" onchange="updatePieceVolume('${id}', this.value)">
-                    <button class="btn" style="padding:6px 8px; font-size:10px;" onclick="playPiecePreview('${id}')">Tocar</button>
-                    <button class="btn" style="padding:6px 8px; font-size:10px;" onclick="pausePiecePreview('${id}')">Pausar</button>
-                </div>
-            `;
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:34px; height:34px; background:url(${store.p[id]?.img || ''}) center/cover #000; border-radius:6px; border:1px solid rgba(255,255,255,0.1);"></div>
+                        <div style="flex:1; min-width:0;">
+                            <input type="text" class="edit-piece-name-input" value="${currentName}" onchange="updatePieceName('${id}', this.value)" style="width:100%;">
+                            <div style="font-size:8px; color:#555; margin-top:3px; letter-spacing:1px;">ID: ${id}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:12px;">
+                        <label class="btn-upload">
+                            🖼️ FOTO
+                            <input type="file" accept="image/*" onchange="upPiece('${id}',this)" style="display:none">
+                        </label>
+                        <label class="btn-upload">
+                            🎵 ÁUDIO
+                            <input type="file" accept="audio/*" onchange="upPieceSound('${id}',this)" style="display:none">
+                        </label>
+                    </div>
+
+                    <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.05);">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <input type="range" min="0" max="1" step="0.05" value="${volValue}" style="flex:1;" oninput="updatePieceVolume('${id}', this.value)">
+                            <div style="display:flex; gap:6px;">
+                                <button class="btn-play-sm" onclick="playPiecePreview('${id}')" title="Testar Som">▶</button>
+                                <button class="btn-play-sm" onclick="pausePiecePreview('${id}')" title="Pausar">⏸</button>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:6px;">
+                             <span id="vol-label-${id}" style="font-size:8px; color:#444; font-weight:800;">GAIN: ${Math.round(volValue*100)}%</span>
+                             <span style="font-size:8px; color:${hasSound ? 'var(--accent)' : '#444'}; font-weight:900; letter-spacing:0.5px;">
+                                ${hasSound ? 'SYSTEM_AUDIO_READY' : 'NO_AUDIO_DATA'}
+                             </span>
+                        </div>
+                    </div>
+                `;
             cont.appendChild(d);
         });
     });
@@ -1280,7 +1278,26 @@ function updatePieceName(id, newName) {
 
 function upPiece(id, i) { const r = new FileReader(); r.onload = e => { if(!store.p[id]) store.p[id]={}; store.p[id].img = e.target.result; save(); renderBoard(); renderConfigLists(); }; r.readAsDataURL(i.files[0]); }
 function upPieceSound(id, i) { const r = new FileReader(); r.onload = e => { if(!store.p[id]) store.p[id]={}; store.p[id].sound = e.target.result; if (pieceSoundAudios[id]) pieceSoundAudios[id].src = e.target.result; if (store.p[id].volume === undefined) store.p[id].volume = 0.8; save(); renderConfigLists(); }; r.readAsDataURL(i.files[0]); }
-function updatePieceVolume(id, value) { if (!store.p[id]) store.p[id] = {}; store.p[id].volume = parseFloat(value); save(); renderConfigLists(); }
+
+function updatePieceVolume(id, value) {
+    const vol = parseFloat(value);
+    if (!store.p[id]) store.p[id] = {};
+    store.p[id].volume = vol;
+
+    // 1. Atualiza o áudio se ele estiver tocando (Preview na Sidebar)
+    const masterVal = parseFloat(document.getElementById('v-master')?.value || 1);
+    if (piecePlayback[id] instanceof Audio) {
+        piecePlayback[id].volume = masterVal * vol;
+    }
+
+    // 2. Atualiza o label de texto sem redesenhar a lista toda
+    const label = document.getElementById(`vol-label-${id}`);
+    if (label) label.innerText = `GAIN: ${Math.round(vol * 100)}%`;
+
+    // 3. Salva no banco (debounced por natureza do IndexedDB seria melhor, mas aqui funciona)
+    save();
+}
+
 function upAvatar(s, i) { const r = new FileReader(); r.onload = e => { store.g['avatar'+s] = e.target.result; save(); updateUI(); }; r.readAsDataURL(i.files[0]); }
 function showTab(t) { 
     ['white','black','sys'].forEach(id => document.getElementById('list-'+id).style.display = (id===t?'block':'none'));
