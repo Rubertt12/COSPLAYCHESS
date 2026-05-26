@@ -208,7 +208,6 @@ function executeMove(from, to, opts = {}) {
     store.g.hasMoved = clonedHasMoved;
     save();
     renderBoard(); renderGraveyard();
-    if (!opts.silent) playPieceSound(mover);
     setTimeout(() => playDefeatSound(), 120);
     const winner = checkForVictory();
     if (!winner) nextTurn();
@@ -357,7 +356,7 @@ function isMoveValid(from, to) {
     switch (type) {
         case 'P':
             if (dc === 0 && dr === direction && !target) return true;
-            if (dc === 0 && dr === direction * 2 && ((color === 'B' && source.row === 1) || (color === 'P' && source.row === 6)) && !target && !store.board[from + direction * 8]) return true;
+            if (dc === 0 && dr === direction * 2 && ((color === 'B' && source.row === 6) || (color === 'P' && source.row === 1)) && !target && !store.board[from + direction * 8]) return true;
             // capture or en-passant
             if (Math.abs(dc) === 1 && dr === direction && target) return true;
             if (Math.abs(dc) === 1 && dr === direction && !target && store.g && store.g.enPassant === to) return true;
@@ -417,25 +416,25 @@ function isSquareAttacked(square, byColor, boardState) {
     return false;
 }
 
-    function pathClearOnBoard(from, to, boardState) {
-        const board = boardState || store.board;
-        const start = getCoord(from);
-        const end = getCoord(to);
-        const dr = end.row - start.row;
-        const dc = end.col - start.col;
-        const stepR = Math.sign(dr);
-        const stepC = Math.sign(dc);
-        if (stepR === 0 && stepC === 0) return false;
-        if (stepR !== 0 && stepC !== 0 && Math.abs(dr) !== Math.abs(dc)) return false;
-        let row = start.row + stepR;
-        let col = start.col + stepC;
-        while (row !== end.row || col !== end.col) {
-            if (board[row * 8 + col]) return false;
-            row += stepR;
-            col += stepC;
-        }
-        return true;
+function pathClearOnBoard(from, to, boardState) {
+    const board = boardState || store.board;
+    const start = getCoord(from);
+    const end = getCoord(to);
+    const dr = end.row - start.row;
+    const dc = end.col - start.col;
+    const stepR = Math.sign(dr);
+    const stepC = Math.sign(dc);
+    if (stepR === 0 && stepC === 0) return false;
+    if (stepR !== 0 && stepC !== 0 && Math.abs(dr) !== Math.abs(dc)) return false;
+    let row = start.row + stepR;
+    let col = start.col + stepC;
+    while (row !== end.row || col !== end.col) {
+        if (board[row * 8 + col]) return false;
+        row += stepR;
+        col += stepC;
     }
+    return true;
+}
 
 function findKingIndex(color, boardState) {
     const board = boardState || store.board;
@@ -590,7 +589,8 @@ function showUnitID(id, callback) {
 }
 
 function renderBoard() {
-    const b = document.getElementById('board'); b.innerHTML = '';
+    const b = document.getElementById('board');
+    const fragment = document.createDocumentFragment();
     const edit = document.getElementById('edit-mode').checked;
     store.board.forEach((id, i) => {
         const sq = document.createElement('div'); 
@@ -623,8 +623,10 @@ function renderBoard() {
             }
             sq.appendChild(c);
         }
-        b.appendChild(sq);
+        fragment.appendChild(sq);
     });
+    b.innerHTML = '';
+    b.appendChild(fragment);
 }
 
 function handleSq(i) {
@@ -771,7 +773,6 @@ function finishDuel(v) {
         store.graveyard.push(idA);
         store.board[pending.f] = null;
     }
-    if (winnerId) playPieceSound(winnerId);
     setTimeout(() => playDefeatSound(), 120);
     document.getElementById('arena').style.display='none';
     renderGraveyard();
@@ -784,7 +785,28 @@ function syncTrackVolume(type) {
     if (fadeIntervals[type]) return; 
     ambientAudios[type].volume = parseFloat(document.getElementById(`vol-${type}`)?.value || 0.7) * parseFloat(document.getElementById('v-master').value);
 }
-function updateMasterVolume() { Object.keys(ambientAudios).forEach(t => syncTrackVolume(t)); }
+
+function updateMasterVolume() {
+    const masterVal = parseFloat(document.getElementById('v-master')?.value || 1);
+
+    // 1. Atualiza áudios de Ambiente
+    Object.keys(ambientAudios).forEach(t => syncTrackVolume(t));
+
+    // 2. Atualiza áudios de peças em execução (previews na sidebar)
+    Object.keys(piecePlayback).forEach(id => {
+        const audio = piecePlayback[id];
+        if (audio instanceof Audio) {
+            const pVol = parseFloat(store.p[id]?.volume ?? 0.8);
+            audio.volume = masterVal * pVol;
+        }
+    });
+
+    // 3. Atualiza áudios da Arena (Duelo ativo)
+    ['left', 'right'].forEach(side => {
+        const audio = arenaPlayback[side];
+        if (audio instanceof Audio) audio.volume = masterVal;
+    });
+}
 
 function updateBoardZoom(value) {
     const zoom = parseFloat(value) || 1;
@@ -935,12 +957,17 @@ function fadeOutPlayback(playback, callback) {
 
 function playPieceSound(id) {
     if (!id) return;
+    
+    // Para qualquer outra música de peça que esteja tocando para evitar sobreposição
+    Object.keys(piecePlayback).forEach(key => stopPiecePlayback(key, true));
+
     const audio = getPieceAudio(id);
     if (audio) {
         try {
             audio.currentTime = 0;
             audio.volume = parseFloat(document.getElementById('v-master')?.value || 1) * 0.9;
             audio.play().catch(() => {});
+            piecePlayback[id] = audio; // Registra o playback para permitir o controle (pause/stop) via UI
         } catch (err) {}
     } else {
         playDefaultPieceSound(id);
@@ -1294,8 +1321,16 @@ function closeArena() {
 }
 
 function rollInitiative() {
-    const win = Math.random() < 0.5 ? 'BRANCAS' : 'PRETAS';
+    const side = Math.random() < 0.5 ? 'B' : 'P';
+    turn = side;
+    const win = side === 'B' ? 'BRANCAS' : 'PRETAS';
     alert(`🎲 Iniciativa sorteada! O jogo começa com as: ${win}`);
+    updateUI();
+    
+    // Se o jogo já estiver em live e for a vez da IA, executa o movimento
+    if (isLive && store.g.mode === 'AI' && turn === store.g.aiSide) {
+        setTimeout(() => aiMakeMove(), 600);
+    }
 }
 function clearBoardPieces() {
     if(confirm("Limpar todas as peças do tabuleiro?")) {
