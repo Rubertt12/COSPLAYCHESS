@@ -7,10 +7,13 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    show: false, // Não mostra a janela até que o conteúdo carregue
+    backgroundColor: '#050508', // Cor de fundo que combina com seu CSS
     icon: path.join(__dirname, 'img/favicon-Photoroom.png'), // Caminho do seu ícone
     webPreferences: {
       nodeIntegration: false, // Segurança
-      contextIsolation: true
+      contextIsolation: true,
+      spellcheck: false
     }
   });
 
@@ -19,8 +22,10 @@ function createWindow() {
 
   win.loadFile('index.html');
 
-  // Abre em ecrã total se preferir
-  // win.maximize();
+  // Mostra a janela suavemente quando estiver pronta
+  win.once('ready-to-show', () => {
+    win.show();
+  });
 }
 
 app.whenReady().then(createWindow);
