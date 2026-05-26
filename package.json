@@ -8,6 +8,10 @@
     "build": "electron-builder --win",
     "dist": "electron-builder"
   },
+  "overrides": {
+    "rimraf": "^5.0.7",
+    "glob": "^10.3.15"
+  },
   "author": "Rubra Studios",
   "license": "MIT",
   "devDependencies": {
