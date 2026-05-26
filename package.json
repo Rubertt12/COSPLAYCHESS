@@ -1,41 +1,39 @@
 {
   "name": "cosplay-chess",
-  "version": "1.0.0",
-  "description": "Cosplay Chess Battle Engine",
+  "version": "1.0.2",
+  "description": "A Proxima Geracao de Engines de Batalha para Palcos Geek",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win portable"
+    "build": "electron-builder --win"
   },
-  "keywords": [],
   "author": "Rubra Studios",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^42.2.0",
     "electron-builder": "^26.8.1"
   },
   "build": {
-    "appId": "com.rubrastudios.cosplaychess",
+    "appId": "com.rubra.cosplaychess",
     "productName": "Cosplay Chess",
     "directories": {
       "output": "dist"
     },
     "win": {
-      "target": "portable",
+      "target": [
+        "nsis"
+      ],
       "icon": "img/favicon-Photoroom.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Cosplay Chess"
     },
     "files": [
       "**/*",
-      "!dist/*"
+      "!dist"
     ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Rubertt12/COSPLAYCHESS.git"
-  },
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/Rubertt12/COSPLAYCHESS/issues"
-  },
-  "homepage": "https://github.com/Rubertt12/COSPLAYCHESS#readme"
+  }
 }

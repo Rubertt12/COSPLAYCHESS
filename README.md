@@ -17,7 +17,7 @@
 
 ---
 
-### 📥 [BAIXAR ÚLTIMA VERSÃO](https://github.com/Rubertt12/COSPLAYCHESS/releases/download/xadrez/cosplay-chess-rubra.Setup.1.0.2.exe) | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
+### 📥 [BAIXAR ÚLTIMA VERSÃO](https://github.com/Rubertt12/COSPLAYCHESS/releases/download/v1.0.2/Cosplay.Chess.Setup.1.0.2.exe) | 📖 [DOCUMENTAÇÃO](#) | 💬 [SUPORTE](#)
 
 ---
 
@@ -65,6 +65,3 @@ Na sidebar lateral, você pode clicar em qualquer peça para fazer o upload da f
 Quando um duelo começa, a música ambiente diminui e o foco vai para os competidores. Use os botões `▶` e `||` para sincronizar as falas dos cosplayers com a ação no palco.
 
 ---
-
-
-
