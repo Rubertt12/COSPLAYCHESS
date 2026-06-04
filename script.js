@@ -9,6 +9,8 @@ const getInitialBoard = () => [
     ...peoes.map(id => id + '_B'), ...nobres.map(id => id + '_B')
 ];
 
+let historyStack = [];
+
 let db, store = { 
     p: {}, g: {killsB:0, killsP:0, avatarB:'', avatarP:''}, 
     board: getInitialBoard(), graveyard: [] 
@@ -99,11 +101,13 @@ function loadData() {
         if (store.g.enPassant === undefined) store.g.enPassant = null;
         if (!store.g.hasMoved) store.g.hasMoved = { B: {K:false, Rk:false, Rq:false}, P: {K:false, Rk:false, Rq:false} };
         if (store.g.wallpaper === undefined) store.g.wallpaper = null;
+        if (!store.log) store.log = [];
+        if (!store.g.lastMove) store.g.lastMove = { from: null, to: null };
         applyTheme(store.g.theme);
         if (!store.g.wallpaper) randomWallpaperPreset(true);
         applyWallpaper(store.g.wallpaper);
         populateWallpaperThumbnails();
-        renderBoard(); renderGraveyard(); updateUI(); renderConfigLists(); setupAmbientUI(); updateBoardZoom(store.g.zoomBoard); updateWallpaperSelectionUI();
+        renderBoard(); renderGraveyard(); updateUI(); renderConfigLists(); setupAmbientUI(); updateBoardZoom(store.g.zoomBoard); updateWallpaperSelectionUI(); renderLog();
     };
 }
 
@@ -160,10 +164,17 @@ function executeMove(from, to, opts = {}) {
     // opts: {silent:false}
     const mover = store.board[from];
     if (!mover) return;
+    pushHistory();
     const clonedHasMoved = store.g.hasMoved || { B:{K:false,Rk:false,Rq:false}, P:{K:false,Rk:false,Rq:false} };
     const res = applyMoveToBoard(store.board, from, to, store.g.enPassant, clonedHasMoved);
     // commit
     store.board = res.board;
+    
+    const name = store.p[mover]?.name || pieceNames[mover.charAt(0)];
+    const coord = String.fromCharCode(65 + (to % 8)) + (8 - Math.floor(to / 8));
+    addLogEntry(`<b>${name}</b> movido para <b>${coord}</b>`);
+
+    store.g.lastMove = { from, to };
     if (res.captured) {
         store.graveyard.push(res.captured);
         lastCapturePos = to;
@@ -378,13 +389,13 @@ function isSquareAttacked(square, byColor, boardState) {
                 break;
             }
             case 'T':
-                if ((dr === 0 || dc === 0) && pathClearOnBoard(i, square, board)) return true;
+                if ((dr === 0 || dc === 0) && (absdr + absdc > 0) && pathClearOnBoard(i, square, board)) return true;
                 break;
             case 'B':
-                if (absdr === absdc && pathClearOnBoard(i, square, board)) return true;
+                if (absdr === absdc && absdr > 0 && pathClearOnBoard(i, square, board)) return true;
                 break;
             case 'Q':
-                if ((dr === 0 || dc === 0 || absdr === absdc) && pathClearOnBoard(i, square, board)) return true;
+                if ((dr === 0 || dc === 0 || absdr === absdc) && (absdr + absdc > 0) && pathClearOnBoard(i, square, board)) return true;
                 break;
             case 'K':
                 if (Math.max(absdr, absdc) === 1) return true;
@@ -503,24 +514,10 @@ function applyMoveToBoard(board, from, to, enPassantTarget, hasMovedObj) {
 }
 
 function isLegalMove(from, to) {
-    // basic pseudo-legal movement
     if (!isMoveValid(from, to)) return false;
-    // simulate move and check king safety
+    const mover = store.board[from];
     const clonedHasMoved = JSON.parse(JSON.stringify(store.g.hasMoved || { B:{K:false,Rk:false,Rq:false}, P:{K:false,Rk:false,Rq:false} }));
     const res = applyMoveToBoard(store.board, from, to, store.g.enPassant, clonedHasMoved);
-    // if castling, we must also ensure squares passed are not attacked
-    const mover = store.board[from];
-    if (mover && mover.charAt(0) === 'K') {
-        const src = getCoord(from);
-        const dst = getCoord(to);
-        const step = dst.col > src.col ? 1 : -1;
-        // check each square king passes (including destination) not attacked
-        for (let c = src.col; c !== dst.col + step; c += step) {
-            const idx = src.row * 8 + c;
-            if (isSquareAttacked(idx, mover.endsWith('_B') ? 'P' : 'B', res.board)) return false;
-        }
-    }
-    // finally check resulting board king not in check
     return !isKingInCheck(mover?.endsWith('_B') ? 'B' : 'P', res.board);
 }
 function showWrongSideModal() {
@@ -573,11 +570,31 @@ function renderBoard() {
     const b = document.getElementById('board');
     const fragment = document.createDocumentFragment();
     const edit = document.getElementById('edit-mode').checked;
+    
+    const bCheck = isKingInCheck('B');
+    const pCheck = isKingInCheck('P');
+
     store.board.forEach((id, i) => {
         const sq = document.createElement('div'); 
         sq.className = `sq ${(Math.floor(i/8) + i%8) % 2 == 0 ? 'l' : 'd'}`;
         sq.onclick = () => handleSq(i);
+
+        // Destaque de Xeque no Rei
+        if (id && id.charAt(0) === 'K') {
+            if ((id.endsWith('_B') && bCheck) || (id.endsWith('_P') && pCheck)) sq.classList.add('in-check');
+        }
         
+        // Mostrar movimentos possíveis se houver peça selecionada
+        if (sel !== null && !edit && isLegalMove(sel, i)) {
+            const dot = document.createElement('div');
+            dot.className = 'legal-dot';
+            sq.appendChild(dot);
+        }
+
+        if (store.g.lastMove && (i === store.g.lastMove.from || i === store.g.lastMove.to)) {
+            sq.classList.add('last-move');
+        }
+
         if(id) {
             const c = document.createElement('div'); c.className='piece-container';
             const p = document.createElement('div'); p.className='piece';
@@ -739,11 +756,23 @@ function openArena() {
 }
 
 function finishDuel(v) {
+    const arenaContent = document.querySelector('.arena-content');
+    if (arenaContent) {
+        arenaContent.classList.add('shake');
+        setTimeout(() => arenaContent.classList.remove('shake'), 500);
+    }
+
     const idA = store.board[pending.f], idD = store.board[pending.t];
+    const nameA = store.p[idA]?.name || pieceNames[idA.charAt(0)];
+    const nameD = store.p[idD]?.name || pieceNames[idD.charAt(0)];
+
     const corA = idA.endsWith('_B') ? 'B' : 'P';
     if (v === 'B') store.g.killsB++;
     else store.g.killsP++;
+
     const winnerId = (v === corA) ? idA : idD;
+    addLogEntry(`Duelo: <b>${nameA}</b> vs <b>${nameD}</b>. Vitória: <b>${v === corA ? nameA : nameD}</b>`);
+
     if (v === corA) {
         // attacker venceu: executar movimento normalmente (respeita promo/en-passant/roque)
         executeMove(pending.f, pending.t);
@@ -762,13 +791,37 @@ function finishDuel(v) {
     if (!winner) nextTurn();
 }
 
+function syncVolumes(type, val) {
+    if (type === 'master') {
+        const sidebar = document.getElementById('v-master');
+        const dash = document.getElementById('v-master-dash');
+        if (sidebar) sidebar.value = val;
+        if (dash) dash.value = val;
+        updateMasterVolume();
+    } else if (type === 'ambient') {
+        const sidebar = document.getElementById('vol-Ambiente');
+        const dash = document.getElementById('v-ambient-dash');
+        if (sidebar) sidebar.value = val;
+        if (dash) dash.value = val;
+        syncTrackVolume('Ambiente');
+    }
+}
+
 function syncTrackVolume(type) {
     if (fadeIntervals[type]) return; 
-    ambientAudios[type].volume = parseFloat(document.getElementById(`vol-${type}`)?.value || 0.7) * parseFloat(document.getElementById('v-master').value);
+    const volSlider = document.getElementById(`vol-${type}`);
+    const val = parseFloat(volSlider?.value || 0.7);
+    if (type === 'Ambiente' && document.getElementById('v-ambient-dash')) {
+        document.getElementById('v-ambient-dash').value = val;
+    }
+    ambientAudios[type].volume = val * parseFloat(document.getElementById('v-master').value);
 }
 
 function updateMasterVolume() {
     const masterVal = parseFloat(document.getElementById('v-master')?.value || 1);
+    if (document.getElementById('v-master-dash')) {
+        document.getElementById('v-master-dash').value = masterVal;
+    }
 
     // 1. Atualiza áudios de Ambiente
     Object.keys(ambientAudios).forEach(t => syncTrackVolume(t));
@@ -793,18 +846,21 @@ function updateBoardZoom(value) {
     const zoom = parseFloat(value) || 1;
     store.g.zoomBoard = zoom;
     const wrapper = document.querySelector('.board-wrapper');
-    if (wrapper) {
+    const board = document.getElementById('board');
+    if (wrapper && board) {
         wrapper.style.transform = `scale(${zoom})`;
+        
+        const baseWidth = board.offsetWidth;
+        const baseHeight = board.offsetHeight;
+        
+        // No mobile, evitamos que o wrapper force uma largura maior que a tela 
+        // se o zoom for 1, para manter o layout flexível.
+        wrapper.style.width = (baseWidth * zoom) + 'px';
+        wrapper.style.height = (baseHeight * zoom) + 'px';
+        
         wrapper.style.transformOrigin = 'center center';
     }
-
-    const graveyard = document.querySelector('.graveyard-container');
-    if (graveyard && wrapper) {
-        const baseWidth = wrapper.clientWidth;
-        const extraSpace = Math.max(0, (baseWidth * zoom - baseWidth) / 2);
-        graveyard.style.marginLeft = `${20 + extraSpace}px`;
-    }
-
+    
     const slider = document.getElementById('board-zoom');
     if (slider) slider.value = zoom;
     save();
@@ -1095,6 +1151,49 @@ function upAmb(t, i) {
     r.readAsDataURL(i.files[0]);
 }
 
+function exportSquadData() {
+    const data = JSON.stringify({ p: store.p, g: store.g });
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cosplay-chess-data-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importSquadData(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.p) store.p = data.p;
+            if (data.g) store.g = { ...store.g, ...data.g };
+            save();
+            alert("Dados importados com sucesso! A página será reiniciada.");
+            location.reload();
+        } catch (err) {
+            alert("Erro ao importar o arquivo. Certifique-se de que é um JSON válido do Cosplay Chess.");
+        }
+    };
+    reader.readAsText(file);
+}
+
+function addLogEntry(msg) {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    store.log.unshift(`[${time}] ${msg}`);
+    if (store.log.length > 50) store.log.pop();
+    renderLog();
+}
+
+function renderLog() {
+    const cont = document.getElementById('list-log');
+    if (!cont) return;
+    cont.innerHTML = store.log.map(entry => `<div class="log-entry">${entry}</div>`).join('');
+}
+
 function save() { if(db) db.transaction("assets","readwrite").objectStore("assets").put(store,"all"); }
 
 function nextTurn() { 
@@ -1171,6 +1270,7 @@ function newGame() {
     store.graveyard = [];
     store.g.killsB = 0;
     store.g.killsP = 0;
+    store.g.lastMove = { from: null, to: null };
     isLive = false;
     sel = null; pending = null; gySel = null;
     clearMateHighlight();
@@ -1368,5 +1468,21 @@ window.addEventListener('click', function(e) {
     // Se o menu estiver aberto e o clique NÃO for dentro do menu e NÃO for no botão de abrir
     if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
         sidebar.classList.remove('open');
+    }
+});
+
+// Atalho de teclado: ESC para fechar a arena ou alternar o menu lateral
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const arena = document.getElementById('arena');
+        if (arena && arena.style.display === 'flex') closeArena();
+        else toggleMenu();
+    }
+
+    // Atalhos de Arena (Apenas se a arena estiver visível)
+    const arena = document.getElementById('arena');
+    if (arena && arena.style.display === 'flex') {
+        if (e.key === '1' || e.code === 'Digit1') finishDuel('B');
+        if (e.key === '2' || e.code === 'Digit2') finishDuel('P');
     }
 });

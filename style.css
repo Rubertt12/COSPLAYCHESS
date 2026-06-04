@@ -56,26 +56,59 @@ body, html {
 /* --- DASHBOARD SUPERIOR --- */
 #dashboard { 
     background: rgba(20,20,20,0.8); 
-    padding: 10px 20px; 
+    padding: 0 25px; 
     display: flex; 
-    justify-content: space-between;
+    justify-content: center; /* Centraliza todo o conteúdo do dashboard */
     align-items: center;
     backdrop-filter: blur(10px); 
-    border-bottom: 1px solid #222; 
-    height: 75px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+    min-height: 65px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    z-index: 1000;
+    gap: 30px; /* Espaçamento entre os cards dos jogadores e o grupo central */
 }
+
+.dashboard-center-group {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espaçamento entre os controles de volume e o texto "VS" */
+}
+
+.vs-text {
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,0.1);
+    font-weight: 900;
+    font-size: 10px;
+    padding: 0 10px;
+    letter-spacing: 2px;
+}
+
+.dash-controls { display: flex; gap: 12px; background: rgba(255, 255, 255, 0.03); padding: 6px 15px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.08); }
+.ctrl-group { display: flex; align-items: center; gap: 8px; }
+.ctrl-label { font-size: 8px; font-weight: 900; color: var(--accent); letter-spacing: 1px; opacity: 0.7; }
+.dash-controls input[type=range] { width: 60px; height: 3px; }
+.dash-controls input[type=range]::-webkit-slider-thumb { width: 10px; height: 10px; }
+
+.dash-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white; width: 22px; height: 22px; border-radius: 4px;
+    cursor: pointer; font-size: 9px; display: flex; align-items: center; justify-content: center; transition: 0.2s;
+}
+.dash-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(0, 229, 255, 0.1); }
 
 .player-card { 
     display: flex; 
     align-items: center; 
-    gap: 12px; 
-    padding: 6px 15px; 
+    gap: 15px; 
+    padding: 4px 10px; 
     border-radius: 8px; 
     border: 2px solid transparent; 
     transition: 0.3s; 
 }
-.active-B { border-color: #fff; box-shadow: inset 0 0 10px rgba(255,255,255,0.2); } 
-.active-P { border-color: var(--danger); box-shadow: inset 0 0 10px rgba(255,0,85,0.2); }
+.active-B { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.03); } 
+.active-P { border-color: rgba(255,0,85,0.4); background: rgba(255,0,85,0.03); }
 
 .p-img { 
     width: 44px; 
@@ -88,17 +121,17 @@ body, html {
 .player-name-input { 
     background: transparent; 
     border: none; 
-    font-weight: bold; 
-    font-size: 1.1em; 
-    width: 140px; 
+    font-weight: 800; 
+    font-size: 1rem; 
+    width: 120px; 
     color: white; 
 }
 .player-name-input:focus { outline: none; border-bottom: 1px solid var(--accent); }
-.p-score { font-size: 24px; font-weight: 900; }
+.p-score { font-size: 22px; font-weight: 900; min-width: 25px; text-align: center; }
 
 /* --- ESTRUTURA PRINCIPAL (BOARD + GRAVEYARD) --- */
 .app-container {
-    height: calc(100vh - 75px);
+    height: 100vh;
     display: flex;
     flex-direction: column;
 }
@@ -106,20 +139,24 @@ body, html {
 main { 
     flex: 1;
     display: flex; 
-    align-items: center; 
+    align-items: center;
     justify-content: center; 
-    gap: 30px; 
-    padding: 15px;
+    gap: 60px; /* Espaço garantido entre tabuleiro e eliminados */
+    padding: 40px;
     position: relative;
+    overflow: auto; /* Scroll surge apenas se o zoom exceder a tela */
 }
 
 /* --- TABULEIRO ULTRA CONTROLADO --- */
 .board-wrapper { 
     position: relative; 
-    padding: 30px; 
-    overflow: visible;
+    padding: 25px; 
+    flex-shrink: 0; /* Impede o tabuleiro de diminuir */
     transform-origin: center center;
     transition: transform 0.15s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #board { 
@@ -147,6 +184,16 @@ main {
 .l { background: rgba(30, 30, 36, 0.85); } /* --sq-l com transparência */
 .d { background: rgba(10, 10, 15, 0.85); } /* --sq-d com transparência */
 
+/* Pontos de Movimento Legal */
+.legal-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
 /* --- PEÇAS ARREDONDADAS (FIM DAS OVAIS) --- */
 .piece-container { 
     width: 84%; 
@@ -172,6 +219,28 @@ main {
     justify-content: center;
 }
 .piece:hover { transform: scale(1.08); }
+
+/* Alerta de Xeque */
+.sq.in-check { 
+    background: radial-gradient(circle, rgba(255, 0, 85, 0.4) 0%, transparent 75%) !important;
+    animation: check-pulse 1.5s infinite alternate;
+}
+@keyframes check-pulse { from { opacity: 0.5; } to { opacity: 1; } }
+
+/* Destaque do Último Movimento */
+.sq.last-move { 
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Efeito de Impacto na Arena */
+.shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes shake {
+    10%, 90% { transform: translate3d(-2px, 0, 0); }
+    20%, 80% { transform: translate3d(4px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+    40%, 60% { transform: translate3d(8px, 0, 0); }
+}
 
 /* Fallback para Peças Sem Imagem */
 .no-img { 
@@ -260,20 +329,22 @@ main {
 
 /* --- COORDENADAS REPOSICIONADAS --- */
 .coord-h, .coord-v { position: absolute; display: flex; color: var(--accent); font-weight: bold; font-size: 13px; opacity: 0.8; }
-.coord-h { width: min(70vw, 68vh); bottom: 8px; left: 30px; justify-content: space-around; }
-.coord-v { height: min(70vw, 68vh); left: 10px; top: 30px; flex-direction: column; justify-content: space-around; }
+.coord-h { left: 36px; right: 36px; bottom: 8px; justify-content: space-around; }
+.coord-v { top: 36px; bottom: 36px; left: 10px; flex-direction: column; justify-content: space-around; }
 
 /* --- PAINEL DO CEMITÉRIO LADO DIREITO FIXO --- */
 .graveyard-container {
     width: 140px; 
-    height: min(70vw, 68vh); 
+    height: fit-content;
+    max-height: 75vh;
     background: rgba(13, 13, 18, 0.75); 
-    border: 1px solid #222;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     padding: 15px 10px; 
     border-radius: 6px; 
     backdrop-filter: blur(5px);
     display: flex;
     flex-direction: column;
+    flex-shrink: 0; /* Impede o cemitério de amassar */
 }
 
 #graveyard { 
@@ -285,7 +356,6 @@ main {
     flex: 1;
     padding-right: 2px;
 }
-.graveyard-container { transition: margin-left 0.15s ease; }
 
 .gy-piece {
     width: 32px; 
@@ -321,6 +391,17 @@ aside.open { left: 0; }
 .tabs button { flex: 1; padding: 12px; background: none; border: none; color: #555; cursor: pointer; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
 .tabs button.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
 .scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
+
+/* Log de Movimentos */
+.log-entry {
+    font-size: 10px;
+    padding: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: #ccc;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+}
+.log-entry b { color: var(--accent); }
 
 .unit-card { 
     background: #15151e; 
@@ -384,6 +465,7 @@ aside.open { left: 0; }
     letter-spacing: 8px; 
     font-weight: 900; 
     background: linear-gradient(to bottom, #fff, #888);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -496,3 +578,90 @@ input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: 
 .victory-content { text-align: center; background: #09090e; border: 1px solid var(--gold); padding: 40px; border-radius: 8px; width: 350px; box-shadow: 0 0 30px rgba(255,215,0,0.2); }
 .trophy-wrap { position: relative; margin: -80px auto 20px; width: 100px; height: 100px; }
 .winner-photo-circle { width: 100%; height: 100%; border-radius: 50%; border: 3px solid var(--gold); background-size: cover; background-position: center; background-color: #000; }
+
+/* --- RESPONSIVIDADE PARA CELULAR --- */
+@media (max-width: 768px) {
+    body, html { overflow: auto; }
+    
+    #dashboard {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+        gap: 10px;
+    }
+
+    .dashboard-center-group {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .player-card {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .vs-text { display: none; }
+
+    main {
+        flex-direction: column;
+        gap: 30px;
+        padding: 20px 10px;
+        justify-content: flex-start;
+    }
+
+    #board {
+        width: 92vw;
+        height: 92vw;
+        border-width: 4px;
+    }
+
+    .board-wrapper {
+        padding: 20px;
+    }
+
+    .coord-h, .coord-v { font-size: 10px; }
+    .coord-h { left: 22px; right: 22px; }
+    .coord-v { top: 22px; bottom: 22px; left: 5px; }
+
+    .graveyard-container {
+        width: 92vw;
+        max-height: 120px;
+        margin-bottom: 80px;
+    }
+
+    #graveyard {
+        grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+    }
+
+    aside {
+        width: 100%;
+        left: -100%;
+    }
+
+    .start-content {
+        padding: 25px 15px;
+        border-radius: 0;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .start-content h1 { font-size: 1.8rem; letter-spacing: 4px; }
+    .theme-grid { grid-template-columns: 1fr; }
+
+    .arena-fighters {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .arena-box {
+        width: 140px;
+        height: 140px;
+    }
+
+    .arena-content {
+        width: 95vw;
+        padding: 20px;
+    }
+}

@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
     <title>Cosplay Chess - Rubra Studios</title>
     <link rel="icon" type="image/png" href="img/favicon-Photoroom.png">
     <link rel="stylesheet" href="style.css">
@@ -91,12 +91,14 @@
     <div class="tabs">
         <button id="t-white" class="active" onclick="showTab('white')">BRANCAS</button>
         <button id="t-black" onclick="showTab('black')">PRETAS</button>
+        <button id="t-log" onclick="showTab('log')">LOG</button>
         <button id="t-sys" onclick="showTab('sys')">SISTEMA</button>
     </div>
-    
+
     <div class="scroll-area" id="list-white"></div>
     <div class="scroll-area" id="list-black" style="display:none"></div>
-    
+    <div class="scroll-area" id="list-log" style="display:none"></div>
+
     <div class="scroll-area" id="list-sys" style="display:none">
         <div class="unit-card">
             <b style="font-size: 11px;">VOLUME MESTRE</b>
@@ -112,10 +114,21 @@
             <div style="display:flex; justify-content:space-between; font-size:10px; color:#aaa; margin-top:5px;"><span>0.6x</span><span>1x</span><span>1.6x</span></div>
         </div>
         <button class="btn" onclick="rollInitiative()" style="background:#1c1c24; color:var(--accent); margin-bottom: 8px;">🎲 SORTEAR INÍCIO</button>
+
+        <div class="unit-card" style="background: rgba(0,229,255,0.05); border-color: rgba(0,229,255,0.2);">
+            <b style="color: var(--accent); font-size: 10px; letter-spacing: 1px;">💾 GESTÃO DE DADOS</b>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
+                <button class="btn-play-sm" style="width:100%; font-size:8px;" onclick="exportSquadData()">EXPORTAR</button>
+                <button class="btn-play-sm" style="width:100%; font-size:8px;" onclick="document.getElementById('import-file').click()">IMPORTAR</button>
+                <input type="file" id="import-file" style="display:none" accept=".json" onchange="importSquadData(this)">
+            </div>
+        </div>
+
+        <button class="btn" onclick="undoMove()" style="background:#2a2a35; color:#fff; margin-bottom: 8px;">⟲ DESFAZER JOGADA</button>
         <button class="btn" onclick="clearBoardPieces()" style="background:#222; color:#fff; margin-bottom: 8px;">🧹 LIMPAR TABULEIRO</button>
         <button class="btn" onclick="resetGame()" style="background:var(--danger); color:#fff;">⚠️ RESET TOTAL</button>
     </div>
-    
+
     <div style="padding: 15px; background: #000; border-top: 1px solid #222;">
         <button class="btn btn-yes" style="width: 100%; padding: 12px; font-weight: 900;" onclick="startBattle()">ATIVAR BATALHA</button>
     </div>
@@ -123,23 +136,41 @@
 
 <div class="app-container">
     <div id="dashboard">
-        <div id="card-B" class="player-card">
-            <div id="img-B" class="p-img" onclick="document.getElementById('f-av-B').click()" title="Mudar Avatar"></div>
-            <input type="file" id="f-av-B" style="display:none" onchange="upAvatar('B', this)">
-            <input type="text" id="name-B" value="Jogador 1" class="player-name-input" style="color:#00e5ff">
-            <div id="score-B" class="p-score">0</div>
-        </div>
-        
-        <div style="display: flex; align-items: center; color: #333; font-weight: 900; font-size: 14px; padding: 0 10px;">VS</div>
-        
-        <div id="card-P" class="player-card" style="flex-direction: row-reverse; text-align: right;">
-            <div id="img-P" class="p-img" onclick="document.getElementById('f-av-P').click()" title="Mudar Avatar"></div>
-            <input type="text" id="name-P" value="Jogador 2" class="player-name-input" style="color:var(--danger); text-align: right;">
-            <div id="score-P" class="p-score" style="color:var(--danger)">0</div>
-            <input type="file" id="f-av-P" style="display:none" onchange="upAvatar('P', this)">
-        </div>
-    </div>
-    
+
+        <div class="dashboard-center-group">
+            <!-- NOVOS CONTROLES DE VOLUME RÁPIDO -->
+            <div class="dash-controls">
+                <div class="ctrl-group">
+                    <button class="dash-btn" onclick="document.getElementById('f-amb-dash').click()" title="Subir Áudio">📁</button>
+                    <button class="dash-btn" onclick="playWithFade('Ambiente')" title="Play">▶</button>
+                    <button class="dash-btn" onclick="stopWithFade('Ambiente')" title="Pause">⏸</button>
+                </div>
+                    <span class="ctrl-label">MASTER</span>
+                    <input type="range" id="v-master-dash" min="0" max="1" step="0.1" value="1" oninput="syncVolumes('master', this.value)">
+                </div>
+                <div class="ctrl-group">
+                    <span class="ctrl-label">AMB</span>
+                    <input type="range" id="v-ambient-dash" min="0" max="1" step="0.1" value="0.7" oninput="syncVolumes('ambient', this.value)">
+
+                    <input type="file" id="f-amb-dash" style="display:none" onchange="upAmb('Ambiente', this)">
+                <div id="card-B" class="player-card">
+                    <div id="img-B" class="p-img" onclick="document.getElementById('f-av-B').click()" title="Mudar Avatar"></div>
+                    <input type="file" id="f-av-B" style="display:none" onchange="upAvatar('B', this)">
+                    <input type="text" id="name-B" value="Jogador 1" class="player-name-input" style="color:#00e5ff">
+                    <div id="score-B" class="p-score">0</div>
+                </div>
+                <div class="vs-text">V S</div>
+                <div id="card-P" class="player-card" style="flex-direction: row-reverse; text-align: right;">
+                    <div id="img-P" class="p-img" onclick="document.getElementById('f-av-P').click()" title="Mudar Avatar"></div>
+                    <input type="text" id="name-P" value="Jogador 2" class="player-name-input" style="color:var(--danger); text-align: right;">
+                    <div id="score-P" class="p-score" style="color:var(--danger)">0</div>
+                    <input type="file" id="f-av-P" style="display:none" onchange="upAvatar('P', this)">
+                </div>
+            </div>
+                </div>
+            </div>
+
+
     <main>
         <div class="board-wrapper">
             <div class="coord-v"><div>8</div><div>7</div><div>6</div><div>5</div><div>4</div><div>3</div><div>2</div><div>1</div></div>
