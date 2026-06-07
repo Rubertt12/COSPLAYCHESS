@@ -318,6 +318,41 @@ function randomWallpaperPreset(setOnLoad = false) {
     if (!setOnLoad) save();
 }
 
+async function fetchRandomAnimeWallpaper() {
+    const btn = document.querySelector('button[onclick="fetchRandomAnimeWallpaper()"]');
+    const oldText = btn ? btn.innerText : '';
+    if(btn) btn.innerText = "CONECTANDO AO SERVIDOR...";
+
+    try {
+        // Alterado para waifu.im para maior estabilidade e suporte a orientação Landscape
+        const res = await fetch('https://api.waifu.im/search?orientation=LANDSCAPE&is_nsfw=false');
+        if (!res.ok) throw new Error('API Indisponível');
+        
+        const data = await res.json();
+        const imageUrl = data.images[0].url;
+
+        // 2. Converte para Blob e depois Base64 para persistência total no IndexedDB
+        const imgRes = await fetch(imageUrl);
+        const blob = await imgRes.blob();
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+            store.g.wallpaper = reader.result;
+            applyWallpaper(store.g.wallpaper);
+            updateWallpaperSelectionUI();
+            save();
+            if(btn) btn.innerText = oldText;
+        };
+    } catch (e) {
+        console.error("Erro na API de Wallpaper:", e);
+        if(btn) btn.innerText = "ERRO! TENTANDO PRESET...";
+        setTimeout(() => {
+            randomWallpaperPreset();
+            if(btn) btn.innerText = oldText;
+        }, 1500);
+    }
+}
+
 function populateWallpaperThumbnails() {
     const keys = Object.keys(wallpaperSVGS);
     keys.forEach((key, idx) => {
@@ -864,6 +899,11 @@ function updateBoardZoom(value) {
     const wrapper = document.querySelector('.board-wrapper');
     if (wrapper) {
         wrapper.style.transform = `scale(${zoom})`;
+        // Se o zoom for muito grande, permitimos o scroll no main para não cortar o tabuleiro
+        const main = document.querySelector('main');
+        if (main) {
+            main.style.overflow = zoom > 1 ? 'auto' : 'hidden';
+        }
     }
     
     const slider = document.getElementById('board-zoom');
