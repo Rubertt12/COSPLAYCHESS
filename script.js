@@ -11,9 +11,53 @@ const getInitialBoard = () => [
 
 let historyStack = [];
 
-let db, store = { 
-    p: {}, g: {killsB:0, killsP:0, avatarB:'', avatarP:''}, 
-    board: getInitialBoard(), graveyard: [] 
+function pushHistory() {
+    historyStack.push(JSON.stringify(store));
+    if (historyStack.length > 30) historyStack.shift();
+}
+
+const DEFAULT_STORE = {
+    p: {}, 
+    g: {
+        killsB: 0, 
+        killsP: 0, 
+        avatarB: '', 
+        avatarP: '',
+        zoomBoard: 1,
+        theme: 'default',
+        mode: 'LOCAL',
+        aiSide: 'P',
+        aiDiff: 'normal',
+        enPassant: null,
+        hasMoved: { B: {K:false, Rk:false, Rq:false}, P: {K:false, Rk:false, Rq:false} },
+        wallpaper: null,
+        lastMove: { from: null, to: null },
+        pinnedMenu: false
+    },
+    board: getInitialBoard(), 
+    graveyard: [],
+    log: []
+};
+
+let db, store = JSON.parse(JSON.stringify(DEFAULT_STORE));
+
+// Regras de movimento unificadas (Estratégia)
+const MOVE_RULES = {
+    'P': (src, dst, dr, dc, target, color, from, to, isAttackOnly, board) => {
+        const direction = color === 'B' ? -1 : 1;
+        if (isAttackOnly) return dr === direction && Math.abs(dc) === 1;
+        // Movimento simples e duplo
+        if (dc === 0 && dr === direction && !target) return true;
+        if (dc === 0 && dr === direction * 2 && ((color === 'B' && src.row === 6) || (color === 'P' && src.row === 1)) && !target && !board[(src.row + direction) * 8 + src.col]) return true;
+        // Captura e En Passant
+        if (Math.abs(dc) === 1 && dr === direction && (target || (store.g && store.g.enPassant === to))) return true;
+        return false;
+    },
+    'T': (src, dst, dr, dc, target, color, from, to, isAttackOnly, board) => (dr === 0 || dc === 0) && (Math.abs(dr) + Math.abs(dc) > 0) && pathClear(from, to, board),
+    'B': (src, dst, dr, dc, target, color, from, to, isAttackOnly, board) => Math.abs(dr) === Math.abs(dc) && Math.abs(dr) > 0 && pathClear(from, to, board),
+    'C': (src, dst, dr, dc) => (Math.abs(dr) === 2 && Math.abs(dc) === 1) || (Math.abs(dr) === 1 && Math.abs(dc) === 2),
+    'Q': (src, dst, dr, dc, target, color, from, to, isAttackOnly, board) => (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc)) && (Math.abs(dr) + Math.abs(dc) > 0) && pathClear(from, to, board),
+    'K': (src, dst, dr, dc) => Math.max(Math.abs(dr), Math.abs(dc)) === 1
 };
 
 let ambientAudios = { Ambiente: new Audio(), Entrada: new Audio(), Intro1: new Audio(), Intro2: new Audio() };
@@ -89,25 +133,22 @@ req.onsuccess = e => { db = e.target.result; loadData(); };
 
 function loadData() {
     db.transaction("assets").objectStore("assets").get("all").onsuccess = e => {
-        if(e.target.result) store = e.target.result;
-        // Fallbacks para garantir que o objeto store tenha tudo
-        if(!store.board) store.board = getInitialBoard();
-        if(!store.graveyard) store.graveyard = [];
-        if(!store.g.zoomBoard) store.g.zoomBoard = 1;
-        if(!store.g.theme) store.g.theme = 'default';
-        if(!store.g.mode) store.g.mode = 'LOCAL';
-        if(!store.g.aiSide) store.g.aiSide = 'P';
-        if(!store.g.aiDiff) store.g.aiDiff = 'normal';
-        if (store.g.enPassant === undefined) store.g.enPassant = null;
-        if (!store.g.hasMoved) store.g.hasMoved = { B: {K:false, Rk:false, Rq:false}, P: {K:false, Rk:false, Rq:false} };
-        if (store.g.wallpaper === undefined) store.g.wallpaper = null;
-        if (!store.log) store.log = [];
-        if (!store.g.lastMove) store.g.lastMove = { from: null, to: null };
+        if(e.target.result) {
+            const saved = e.target.result;
+            // Garantimos que o objeto 'p' (peças) e 'g' (globais) sejam preservados do banco
+            store = { ...DEFAULT_STORE, ...saved };
+            store.g = { ...DEFAULT_STORE.g, ...saved.g };
+            store.p = saved.p || {}; 
+            store.board = saved.board || getInitialBoard();
+            store.log = saved.log || [];
+        }
+
         applyTheme(store.g.theme);
         if (!store.g.wallpaper) randomWallpaperPreset(true);
         applyWallpaper(store.g.wallpaper);
         populateWallpaperThumbnails();
         renderBoard(); renderGraveyard(); updateUI(); renderConfigLists(); setupAmbientUI(); updateBoardZoom(store.g.zoomBoard); updateWallpaperSelectionUI(); renderLog();
+        if (document.getElementById('pin-menu')) document.getElementById('pin-menu').checked = !!store.g.pinnedMenu;
     };
 }
 
@@ -170,14 +211,17 @@ function executeMove(from, to, opts = {}) {
     // commit
     store.board = res.board;
     
-    const name = store.p[mover]?.name || pieceNames[mover.charAt(0)];
+    const color = mover.endsWith('_B') ? 'B' : 'P';
+    const playerName = document.getElementById('name-' + color)?.value || (color === 'B' ? 'Brancas' : 'Pretas');
+    const pieceName = store.p[mover]?.name || pieceNames[mover.charAt(0)];
     const coord = String.fromCharCode(65 + (to % 8)) + (8 - Math.floor(to / 8));
-    addLogEntry(`<b>${name}</b> movido para <b>${coord}</b>`);
+    addLogEntry(`<b>${playerName}</b> movimentou <b>${pieceName}</b> para <b>${coord}</b>`);
 
     store.g.lastMove = { from, to };
     if (res.captured) {
         store.graveyard.push(res.captured);
         lastCapturePos = to;
+        store.g['kills' + color]++;
     }
     // update enPassant and hasMoved
     store.g.enPassant = res.enPassant || null;
@@ -311,104 +355,7 @@ function updateThemeSelectionUI() {
 
 function getCoord(index) { return { row: Math.floor(index / 8), col: index % 8 }; }
 function isSameColor(idA, idB) { return idA && idB && idA.slice(-2) === idB.slice(-2); }
-function pathClear(from, to) {
-    const start = getCoord(from);
-    const end = getCoord(to);
-    const dr = end.row - start.row;
-    const dc = end.col - start.col;
-    const stepR = Math.sign(dr);
-    const stepC = Math.sign(dc);
-    if (stepR === 0 && stepC === 0) return false;
-    if (stepR !== 0 && stepC !== 0 && Math.abs(dr) !== Math.abs(dc)) return false;
-    let row = start.row + stepR;
-    let col = start.col + stepC;
-    while (row !== end.row || col !== end.col) {
-        if (store.board[row * 8 + col]) return false;
-        row += stepR;
-        col += stepC;
-    }
-    return true;
-}
-function isMoveValid(from, to) {
-    const id = store.board[from];
-    if (!id || from === to) return false;
-    const target = store.board[to];
-    if (target && isSameColor(id, target)) return false;
-
-    const source = getCoord(from);
-    const dest = getCoord(to);
-    const dr = dest.row - source.row;
-    const dc = dest.col - source.col;
-    const absdr = Math.abs(dr);
-    const absdc = Math.abs(dc);
-    const color = id.endsWith('_B') ? 'B' : 'P';
-    const direction = color === 'B' ? -1 : 1;
-    const type = id.charAt(0);
-
-    switch (type) {
-        case 'P':
-            if (dc === 0 && dr === direction && !target) return true;
-            if (dc === 0 && dr === direction * 2 && ((color === 'B' && source.row === 6) || (color === 'P' && source.row === 1)) && !target && !store.board[from + direction * 8]) return true;
-            // capture or en-passant
-            if (Math.abs(dc) === 1 && dr === direction && target) return true;
-            if (Math.abs(dc) === 1 && dr === direction && !target && store.g && store.g.enPassant === to) return true;
-            return false;
-        case 'T':
-            return (dr === 0 || dc === 0) && (absdr + absdc > 0) && pathClear(from, to);
-        case 'B':
-            return absdr === absdc && absdr > 0 && pathClear(from, to);
-        case 'Q':
-            return (dr === 0 || dc === 0 || absdr === absdc) && (absdr + absdc > 0) && pathClear(from, to);
-        case 'K':
-            return Math.max(absdr, absdc) === 1;
-        case 'C':
-            return (absdr === 2 && absdc === 1) || (absdr === 1 && absdc === 2);
-        default:
-            return true;
-    }
-}
-
-function cloneBoard(b) { return b.slice(); }
-
-function isSquareAttacked(square, byColor, boardState) {
-    const board = boardState || store.board;
-    for (let i = 0; i < 64; i++) {
-        const id = board[i];
-        if (!id || !id.endsWith('_' + byColor)) continue;
-        const type = id.charAt(0);
-        const src = getCoord(i);
-        const dst = getCoord(square);
-        const dr = dst.row - src.row;
-        const dc = dst.col - src.col;
-        const absdr = Math.abs(dr);
-        const absdc = Math.abs(dc);
-        switch (type) {
-            case 'P': {
-                const direction = byColor === 'B' ? -1 : 1;
-                if (dr === direction && Math.abs(dc) === 1) return true;
-                break;
-            }
-            case 'T':
-                if ((dr === 0 || dc === 0) && (absdr + absdc > 0) && pathClearOnBoard(i, square, board)) return true;
-                break;
-            case 'B':
-                if (absdr === absdc && absdr > 0 && pathClearOnBoard(i, square, board)) return true;
-                break;
-            case 'Q':
-                if ((dr === 0 || dc === 0 || absdr === absdc) && (absdr + absdc > 0) && pathClearOnBoard(i, square, board)) return true;
-                break;
-            case 'K':
-                if (Math.max(absdr, absdc) === 1) return true;
-                break;
-            case 'C':
-                if ((absdr === 2 && absdc === 1) || (absdr === 1 && absdc === 2)) return true;
-                break;
-        }
-    }
-    return false;
-}
-
-function pathClearOnBoard(from, to, boardState) {
+function pathClear(from, to, boardState) {
     const board = boardState || store.board;
     const start = getCoord(from);
     const end = getCoord(to);
@@ -426,6 +373,45 @@ function pathClearOnBoard(from, to, boardState) {
         col += stepC;
     }
     return true;
+}
+function isMoveValid(from, to, boardState) {
+    const board = boardState || store.board;
+    const id = board[from];
+    if (!id || from === to) return false;
+    const target = board[to];
+    if (target && isSameColor(id, target)) return false;
+
+    const source = getCoord(from);
+    const dest = getCoord(to);
+    const dr = dest.row - source.row;
+    const dc = dest.col - source.col;
+    const absdr = Math.abs(dr);
+    const absdc = Math.abs(dc);
+    const color = id.endsWith('_B') ? 'B' : 'P';
+    const direction = color === 'B' ? -1 : 1;
+    const type = id.charAt(0);
+
+    if (type === 'K' && Math.abs(dc) === 2) {
+        if (store.g.hasMoved[color].K) return false;
+        return true; 
+    }
+
+    const rule = MOVE_RULES[type];
+    return rule ? rule(source, dest, dr, dc, target, color, from, to, false, board) : false;
+}
+
+function cloneBoard(b) { return b.slice(); }
+
+function isSquareAttacked(square, byColor, boardState) {
+    const board = boardState || store.board;
+    for (let i = 0; i < 64; i++) {
+        const id = board[i];
+        if (!id || !id.endsWith('_' + byColor)) continue;
+        const src = getCoord(i), dst = getCoord(square);
+        const rule = MOVE_RULES[id.charAt(0)];
+        if (rule && rule(src, dst, dst.row - src.row, dst.col - src.col, board[square], byColor, i, square, true, board)) return true;
+    }
+    return false;
 }
 
 function findKingIndex(color, boardState) {
@@ -514,12 +500,22 @@ function applyMoveToBoard(board, from, to, enPassantTarget, hasMovedObj) {
 }
 
 function isLegalMove(from, to) {
-    if (!isMoveValid(from, to)) return false;
+    if (!isMoveValid(from, to, store.board)) return false;
     const mover = store.board[from];
     const clonedHasMoved = JSON.parse(JSON.stringify(store.g.hasMoved || { B:{K:false,Rk:false,Rq:false}, P:{K:false,Rk:false,Rq:false} }));
     const res = applyMoveToBoard(store.board, from, to, store.g.enPassant, clonedHasMoved);
     return !isKingInCheck(mover?.endsWith('_B') ? 'B' : 'P', res.board);
 }
+
+function undoMove() {
+    if (historyStack.length === 0) return;
+    const previousState = historyStack.pop();
+    store = JSON.parse(previousState);
+    turn = (store.log.length % 2 === 0) ? 'B' : 'P'; 
+    renderBoard(); renderGraveyard(); updateUI(); renderLog();
+    save();
+}
+
 function showWrongSideModal() {
     const modal = document.createElement('div');
     modal.id = 'wrong-side-modal';
@@ -538,7 +534,22 @@ function showWrongSideModal() {
 
 function showInvalidMove(id) {
     const name = store.p[id]?.name || id?.split('_')[0] || 'Peça';
-    alert(`Movimento inválido para ${name}. Escolha um caminho válido ou altere para Movimento Livre.`);
+    const modal = document.createElement('div');
+    modal.id = 'invalid-move-modal';
+    modal.style = "position:fixed; inset:0; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:6000; backdrop-filter:blur(5px);";
+    modal.innerHTML = `
+        <div style="background:#0b0b0d; padding:30px; border-radius:12px; border:1px solid var(--accent); text-align:center; width:340px; box-shadow: 0 25px 60px rgba(0,0,0,0.9);">
+            <h3 style="color:var(--accent); margin-bottom:15px; letter-spacing:2px; font-weight:900;">SISTEMA BLOQUEADO</h3>
+            <p style="color:#eee; font-size:13px; margin-bottom:25px; line-height:1.6;">
+                Movimento inválido para <b>${name}</b>.<br><br>
+                Escolha um caminho válido pelas regras ou ative a <b>Movimentação Livre</b> no menu lateral.
+            </p>
+            <button id="invalid-move-ok" class="btn btn-yes" style="width:100%; margin:0; padding:12px;">CALIBRAR MOVIMENTO</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('invalid-move-ok').onclick = () => modal.remove();
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
 function showUnitID(id, callback) {
@@ -707,6 +718,12 @@ function handleSq(i) {
         if (!free) {
             executeMove(sel, i);
         } else {
+            const color = fromId.endsWith('_B') ? 'B' : 'P';
+            const playerName = document.getElementById('name-' + color)?.value || (color === 'B' ? 'Brancas' : 'Pretas');
+            const pieceName = store.p[fromId]?.name || pieceNames[fromId.charAt(0)];
+            const coord = String.fromCharCode(65 + (i % 8)) + (8 - Math.floor(i / 8));
+            addLogEntry(`[LIVRE] <b>${playerName}</b> moveu <b>${pieceName}</b> para <b>${coord}</b>`);
+
             store.board[i] = fromId;
             store.board[sel] = null;
             sel = null; renderBoard(); save();
@@ -767,8 +784,6 @@ function finishDuel(v) {
     const nameD = store.p[idD]?.name || pieceNames[idD.charAt(0)];
 
     const corA = idA.endsWith('_B') ? 'B' : 'P';
-    if (v === 'B') store.g.killsB++;
-    else store.g.killsP++;
 
     const winnerId = (v === corA) ? idA : idD;
     addLogEntry(`Duelo: <b>${nameA}</b> vs <b>${nameD}</b>. Vitória: <b>${v === corA ? nameA : nameD}</b>`);
@@ -782,6 +797,7 @@ function finishDuel(v) {
         lastCapturePos = pending.f;
         store.graveyard.push(idA);
         store.board[pending.f] = null;
+        store.g['kills' + v]++;
     }
     setTimeout(() => playDefeatSound(), 120);
     document.getElementById('arena').style.display='none';
@@ -846,19 +862,8 @@ function updateBoardZoom(value) {
     const zoom = parseFloat(value) || 1;
     store.g.zoomBoard = zoom;
     const wrapper = document.querySelector('.board-wrapper');
-    const board = document.getElementById('board');
-    if (wrapper && board) {
+    if (wrapper) {
         wrapper.style.transform = `scale(${zoom})`;
-        
-        const baseWidth = board.offsetWidth;
-        const baseHeight = board.offsetHeight;
-        
-        // No mobile, evitamos que o wrapper force uma largura maior que a tela 
-        // se o zoom for 1, para manter o layout flexível.
-        wrapper.style.width = (baseWidth * zoom) + 'px';
-        wrapper.style.height = (baseHeight * zoom) + 'px';
-        
-        wrapper.style.transformOrigin = 'center center';
     }
     
     const slider = document.getElementById('board-zoom');
@@ -873,24 +878,28 @@ function playWithFade(type) {
         }
     });
 
+    // Para os sons de peças e arena com fade ao clicar no ambiente
+    Object.keys(piecePlayback).forEach(id => stopPiecePlayback(id, true));
+    ['left', 'right'].forEach(side => stopArenaPlayback(side, true));
+
     const a = ambientAudios[type];
     const target = parseFloat(document.getElementById(`vol-${type}`)?.value || 0.7) * parseFloat(document.getElementById('v-master').value);
     if (fadeIntervals[type]) clearInterval(fadeIntervals[type]);
-    a.volume = Math.max(a.volume || 0, 0);
+    a.volume = 0; // Começa sempre do zero para um cross-fade limpo
     a.play().catch(() => {});
     fadeIntervals[type] = setInterval(() => {
-        if (a.volume < target - 0.02) a.volume += 0.02;
+        if (a.volume < target - 0.01) a.volume += 0.01;
         else { a.volume = target; clearInterval(fadeIntervals[type]); fadeIntervals[type] = null; }
-    }, 30);
+    }, 20);
 }
 
 function stopWithFade(type) {
     const a = ambientAudios[type];
     if (fadeIntervals[type]) clearInterval(fadeIntervals[type]);
     fadeIntervals[type] = setInterval(() => {
-        if (a.volume > 0.02) a.volume -= 0.02;
+        if (a.volume > 0.01) a.volume -= 0.01;
         else { a.pause(); a.volume = 0; clearInterval(fadeIntervals[type]); fadeIntervals[type] = null; }
-    }, 30);
+    }, 20);
 }
 
 function ensureAudioContext() {
@@ -946,13 +955,13 @@ function playDefeatSound() {
     osc2.stop(ctx.currentTime + 0.3);
 }
 
-function fadeOutAudioElement(audio, duration = 300, callback) {
+function fadeOutAudioElement(audio, duration = 600, callback) {
     if (!audio || typeof audio.volume !== 'number') {
         if (typeof callback === 'function') callback();
         return;
     }
     const currentVolume = audio.volume;
-    const stepTime = 30;
+    const stepTime = 20;
     const steps = Math.max(1, Math.round(duration / stepTime));
     const stepAmount = currentVolume / steps;
     if (playbackFadeIntervals.has(audio)) {
@@ -997,6 +1006,9 @@ function playPieceSound(id) {
     
     // Para qualquer outra música de peça que esteja tocando para evitar sobreposição
     Object.keys(piecePlayback).forEach(key => stopPiecePlayback(key, true));
+
+    // Para a música ambiente ao disparar som de peça
+    Object.keys(ambientAudios).forEach(t => { if (!ambientAudios[t].paused) stopWithFade(t); });
 
     const audio = getPieceAudio(id);
     if (audio) {
@@ -1083,6 +1095,10 @@ function playArenaPiece(side) {
     const otherSide = side === 'left' ? 'right' : 'left';
     stopArenaPlayback(otherSide, true);
     stopArenaPlayback(side, false);
+
+    // Para a música ambiente ao entrar em duelo na arena
+    Object.keys(ambientAudios).forEach(t => { if (!ambientAudios[t].paused) stopWithFade(t); });
+
     const audio = side === 'left' ? arenaAudios.left : arenaAudios.right;
     if (audio) {
         try {
@@ -1105,6 +1121,10 @@ function playPiecePreview(id) {
         if (key !== id) stopPiecePlayback(key, true);
     });
     stopPiecePlayback(id);
+
+    // Para a música ambiente ao testar som de peça na sidebar
+    Object.keys(ambientAudios).forEach(t => { if (!ambientAudios[t].paused) stopWithFade(t); });
+
     const audio = getPieceAudio(id);
     if (audio) {
         try {
@@ -1183,7 +1203,9 @@ function importSquadData(input) {
 
 function addLogEntry(msg) {
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    store.log.unshift(`[${time}] ${msg}`);
+    const entry = `[${time}] ${msg}`;
+    if (!store.log) store.log = [];
+    store.log.unshift(entry);
     if (store.log.length > 50) store.log.pop();
     renderLog();
 }
@@ -1191,7 +1213,10 @@ function addLogEntry(msg) {
 function renderLog() {
     const cont = document.getElementById('list-log');
     if (!cont) return;
+    if (!store.log) store.log = [];
     cont.innerHTML = store.log.map(entry => `<div class="log-entry">${entry}</div>`).join('');
+    // Auto-scroll para o topo (já que usamos unshift para as mais recentes)
+    cont.scrollTop = 0;
 }
 
 function save() { if(db) db.transaction("assets","readwrite").objectStore("assets").put(store,"all"); }
@@ -1235,15 +1260,18 @@ function showVictoryModal(winner) {
     isLive = false;
     const photoEl = document.getElementById('victory-photo');
     const nameEl = document.getElementById('winner-name');
+    const crownEl = document.getElementById('victory-crown');
     const winModal = document.getElementById('victory-modal');
     if (winner === 'DRAW') {
         if (photoEl) photoEl.style.backgroundImage = '';
         if (nameEl) nameEl.innerText = `EMPATE!`;
+        if (crownEl) crownEl.style.display = 'none';
     } else {
         const avatar = store.g['avatar' + winner] || '';
         const playerName = (document.getElementById('name-' + winner)?.value) || (winner === 'B' ? 'BRANCAS' : 'PRETAS');
         if (photoEl) photoEl.style.backgroundImage = avatar ? `url(${avatar})` : '';
-        if (nameEl) nameEl.innerText = `${playerName} venceu!`;
+        if (nameEl) nameEl.innerText = playerName;
+        if (crownEl) crownEl.style.display = 'block';
     }
     // destaque da casa onde ocorreu a captura (xeque mate)
     try {
@@ -1399,10 +1427,31 @@ function updatePieceVolume(id, value) {
 }
 
 function upAvatar(s, i) { const r = new FileReader(); r.onload = e => { store.g['avatar'+s] = e.target.result; save(); updateUI(); }; r.readAsDataURL(i.files[0]); }
-function showTab(t) { 
-    ['white','black','sys'].forEach(id => document.getElementById('list-'+id).style.display = (id===t?'block':'none'));
-    ['t-white','t-black','t-sys'].forEach(id => document.getElementById(id).className = (id==='t-'+t?'active':''));
+function showTab(t) {
+    // Adicionamos 'log' à lista de abas para que o sistema reconheça o clique
+    const tabs = ['white', 'black', 'sys', 'log'];
+    tabs.forEach(id => {
+        const listEl = document.getElementById('list-' + id);
+        const tabBtn = document.getElementById('t-' + id);
+        
+        if (listEl) listEl.style.display = (id === t ? 'block' : 'none');
+        if (tabBtn) tabBtn.className = (id === t ? 'active' : '');
+    });
 }
+
+function pauseGame() {
+    const startMenu = document.getElementById('start-menu');
+    if (startMenu) {
+        startMenu.classList.add('show');
+        startMenu.style.display = 'flex';
+    }
+}
+
+function togglePinMenu(val) {
+    store.g.pinnedMenu = val;
+    save();
+}
+
 function startBattle() {
     if (!store.g.theme) store.g.theme = 'default';
     applyTheme(store.g.theme);
@@ -1464,9 +1513,10 @@ window.addEventListener("load", () => setTimeout(() => document.getElementById("
 window.addEventListener('click', function(e) {
     const sidebar = document.getElementById('sidebar');
     const menuToggle = document.getElementById('menu-toggle');
+    const isPinned = store.g ? store.g.pinnedMenu : false;
     
     // Se o menu estiver aberto e o clique NÃO for dentro do menu e NÃO for no botão de abrir
-    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+    if (!isPinned && sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
         sidebar.classList.remove('open');
     }
 });

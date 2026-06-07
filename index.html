@@ -86,6 +86,7 @@
         <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px">
             <label style="font-size: 12px; cursor: pointer;"><input type="checkbox" id="edit-mode" onchange="renderBoard()"> MODO EDIÇÃO (UPLOAD/REMOVER)</label>
             <label style="font-size: 12px; color: var(--accent); font-weight:bold; cursor: pointer;"><input type="checkbox" id="free-move"> MOVIMENTAÇÃO LIVRE</label>
+            <label style="font-size: 12px; cursor: pointer;"><input type="checkbox" id="pin-menu" onchange="togglePinMenu(this.checked)"> FIXAR MENU LATERAL</label>
         </div>
     </div>
     <div class="tabs">
@@ -144,6 +145,7 @@
                     <button class="dash-btn" onclick="document.getElementById('f-amb-dash').click()" title="Subir Áudio">📁</button>
                     <button class="dash-btn" onclick="playWithFade('Ambiente')" title="Play">▶</button>
                     <button class="dash-btn" onclick="stopWithFade('Ambiente')" title="Pause">⏸</button>
+                    <button class="dash-btn" onclick="pauseGame()" title="Pausar Partida / Configurações" style="margin-left: 10px; border-color: var(--accent); color: var(--accent); font-size: 8px; width: auto; padding: 0 8px;">⏸ PAUSA</button>
                 </div>
                     <span class="ctrl-label">MASTER</span>
                     <input type="range" id="v-master-dash" min="0" max="1" step="0.1" value="1" oninput="syncVolumes('master', this.value)">
@@ -218,9 +220,10 @@
 <div id="victory-modal" class="overlay">
     <div class="victory-content">
         <div class="trophy-wrap">
+            <div id="victory-crown" class="victory-crown">👑</div>
             <div id="victory-photo" class="winner-photo-circle"></div>
         </div>
-        <h1 style="color:var(--gold); letter-spacing: 1px; margin-bottom: 5px;">CAMPEÃO!</h1>
+        <h1 style="color:var(--gold); letter-spacing: 2px; margin-bottom: 5px; font-size: 1.8rem;">CONGRATULATIONS!</h1>
         <p id="winner-name" style="font-weight: bold; font-size: 1.2em; color: #fff;"></p>
         <button class="btn btn-yes" onclick="newGame()" id="victory-newgame" style="width:200px; margin-top:25px; padding: 12px; font-weight: 900;">NOVO JOGO</button>
     </div>
