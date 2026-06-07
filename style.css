@@ -620,6 +620,80 @@ input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: 
     to { transform: translateX(-50%) rotate(5deg) translateY(-10px); }
 }
 
+/* --- ROLETA DE INICIATIVA --- */
+.initiative-content {
+    background: radial-gradient(circle at center, rgba(20, 20, 30, 0.95), #050508);
+    padding: 60px;
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 100px rgba(0,0,0,1);
+}
+
+.wheel-outer {
+    position: relative;
+    width: 340px;
+    height: 340px;
+    margin: 0 auto;
+    border: 12px solid #111;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.05), 0 0 50px rgba(0, 229, 255, 0.15);
+}
+
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    /* 8 Segmentos alternados para melhor percepção de giro */
+    background: conic-gradient(
+        var(--accent) 0 45deg, var(--danger) 45deg 90deg,
+        var(--accent) 90deg 135deg, var(--danger) 135deg 180deg,
+        var(--accent) 180deg 225deg, var(--danger) 225deg 270deg,
+        var(--accent) 270deg 315deg, var(--danger) 315deg 360deg
+    );
+    transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1);
+    border: 4px solid rgba(0,0,0,0.5);
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.6);
+    position: relative;
+}
+
+/* Centro da Roleta (Hub) */
+.wheel::after {
+    content: '';
+    position: absolute;
+    inset: 42%;
+    background: #0a0a0f;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 10px var(--accent);
+    z-index: 5;
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%) rotate(0deg);
+    font-size: 50px;
+    color: white;
+    text-shadow: 0 0 20px rgba(0,0,0,0.9);
+    z-index: 10;
+    filter: drop-shadow(0 0 10px var(--accent));
+    transition: transform 0.1s;
+}
+
+/* Animação de "Tique" do ponteiro */
+.pointer-hit {
+    transform: translateX(-50%) rotate(-15deg);
+}
+
+.winner-flash {
+    animation: winner-pulse 0.4s ease-in-out infinite alternate;
+}
+@keyframes winner-pulse { 
+    from { opacity: 0.6; transform: scale(1) translateY(0); } 
+    to { opacity: 1; transform: scale(1.2) translateY(-5px); } 
+}
+
 /* --- RESPONSIVIDADE PARA CELULAR --- */
 @media (max-width: 768px) {
     body, html { overflow: auto; }

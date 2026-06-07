@@ -955,6 +955,19 @@ function playDefeatSound() {
     osc2.stop(ctx.currentTime + 0.3);
 }
 
+function playTickSound(vol = 0.05) {
+    const ctx = ensureAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(600, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.02);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.02);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.02);
+}
+
 function fadeOutAudioElement(audio, duration = 600, callback) {
     if (!audio || typeof audio.volume !== 'number') {
         if (typeof callback === 'function') callback();
@@ -1487,16 +1500,76 @@ function closeArena() {
 }
 
 function rollInitiative() {
-    const side = Math.random() < 0.5 ? 'B' : 'P';
-    turn = side;
-    const win = side === 'B' ? 'BRANCAS' : 'PRETAS';
-    alert(`🎲 Iniciativa sorteada! O jogo começa com as: ${win}`);
-    updateUI();
+    const modal = document.getElementById('initiative-modal');
+    const wheel = document.getElementById('initiative-wheel');
+    const pointer = document.querySelector('.wheel-pointer');
+    const resultTxt = document.getElementById('initiative-result');
     
-    // Se o jogo já estiver em live e for a vez da IA, executa o movimento
-    if (isLive && store.g.mode === 'AI' && turn === store.g.aiSide) {
-        setTimeout(() => aiMakeMove(), 600);
-    }
+    if (!modal || !wheel || !resultTxt) return;
+
+    // Sorteio
+    const winnerSide = Math.random() < 0.5 ? 'B' : 'P';
+    
+    // Lógica para 8 segmentos (45 graus cada)
+    // B (Cyan) está nos segmentos 0, 2, 4, 6 (0°, 90°, 180°, 270°)
+    // P (Red) está nos segmentos 1, 3, 5, 7 (45°, 135°, 225°, 315°)
+    const bSegments = [0, 90, 180, 270];
+    const pSegments = [45, 135, 225, 315];
+    const baseAngle = winnerSide === 'B' ? bSegments[Math.floor(Math.random()*4)] : pSegments[Math.floor(Math.random()*4)];
+    
+    const baseSpins = 360 * 6; // 6 voltas completas
+    const randomOffset = 5 + Math.random() * 35; // Evita cair na linha divisória
+    const finalRotation = baseSpins + (360 - (baseAngle + randomOffset));
+
+    modal.style.display = 'flex';
+    resultTxt.innerText = '';
+    resultTxt.className = '';
+    wheel.style.transition = 'none';
+    wheel.style.transform = `rotate(0deg)`;
+
+    setTimeout(() => {
+        wheel.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0.1, 1)';
+        wheel.style.transform = `rotate(${finalRotation}deg)`;
+        
+        // Sincronização do som de "Tique"
+        let lastTickAngle = 0;
+        const startTime = performance.now();
+        const duration = 5000;
+
+        function checkTick(now) {
+            const elapsed = now - startTime;
+            const progress = elapsed / duration;
+            if (progress >= 1) return;
+
+            // Curva cubic-bezier aproximada para o som acompanhar o movimento
+            const easeOut = 1 - Math.pow(1 - progress, 4);
+            const currentRotation = finalRotation * easeOut;
+            
+            if (currentRotation - lastTickAngle >= 45) {
+                lastTickAngle += 45;
+                playTickSound(0.05 * (1 - progress)); // Som diminui com a velocidade
+                pointer.classList.add('pointer-hit');
+                setTimeout(() => pointer.classList.remove('pointer-hit'), 50);
+            }
+            requestAnimationFrame(checkTick);
+        }
+        requestAnimationFrame(checkTick);
+    }, 100);
+
+    setTimeout(() => {
+        turn = winnerSide;
+        const winName = winnerSide === 'B' ? 'BRANCAS' : 'PRETAS';
+        resultTxt.innerText = `VAI COMEÇAR: ${winName}`;
+        resultTxt.style.color = winnerSide === 'B' ? 'var(--accent)' : 'var(--danger)';
+        resultTxt.classList.add('winner-flash');
+        playPieceSound(winnerSide === 'B' ? 'K1_B' : 'K1_P'); // Som de vitória do Rei sorteado
+        
+        updateUI(); save();
+        setTimeout(() => {
+            modal.style.display = 'none';
+            if (isLive && store.g.mode === 'AI' && turn === store.g.aiSide) aiMakeMove();
+        }, 2500);
+    }, 5200);
 }
 function clearBoardPieces() {
     if(confirm("Limpar todas as peças do tabuleiro?")) {
