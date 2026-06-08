@@ -310,13 +310,6 @@ function clearWallpaper() {
 function setWallpaperPreset(urlOrKey) {
     if (!urlOrKey) return;
     if (urlOrKey === 'random') return randomWallpaperPreset();
-    if (wallpaperSVGS[urlOrKey]) {
-        const url = presetDataUrl(urlOrKey);
-        store.g.wallpaper = url;
-        applyWallpaper(url);
-        updateWallpaperSelectionUI();
-        save();
-    }
     const url = wallpaperSVGS[urlOrKey] ? presetDataUrl(urlOrKey) : urlOrKey;
     store.g.wallpaper = url;
     applyWallpaper(url);

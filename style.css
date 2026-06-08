@@ -58,22 +58,27 @@ body, html {
     background: rgba(20,20,20,0.8); 
     padding: 10px 20px; 
     display: flex; 
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     backdrop-filter: blur(10px); 
     border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
     min-height: 65px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     z-index: 1000;
-    gap: 30px; /* Espaçamento entre os cards dos jogadores e o grupo central */
+    gap: 20px;
 }
 
-.dashboard-center-group {
+.dashboard-controls-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.dashboard-battle-right {
     display: flex;
     align-items: center;
     gap: 10px;
-    order: 2;
 }
 
 .vs-text {
@@ -151,7 +156,7 @@ main {
 /* --- TABULEIRO ULTRA CONTROLADO --- */
 .board-wrapper { 
     position: relative; 
-    padding: 25px; 
+    padding: 30px; 
     transform-origin: center center;
     transition: transform 0.15s ease;
     display: flex;
@@ -165,8 +170,8 @@ main {
     grid-template-columns: repeat(8, 1fr); 
     grid-template-rows: repeat(8, 1fr);
     /* Força o tabuleiro a ser sempre um quadrado perfeito baseado na altura disponível */
-    width: min(70vw, 68vh); 
-    height: min(70vw, 68vh); 
+    width: min(75vw, 72vh); 
+    height: min(75vw, 72vh); 
     border: 6px solid var(--board-border); 
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
 }
@@ -331,32 +336,30 @@ main {
 /* --- COORDENADAS REPOSICIONADAS --- */
 .coord-h, .coord-v { 
     position: absolute; 
-    display: flex; 
+    display: grid; 
     color: var(--accent); 
     font-weight: bold; 
-    font-size: 13px; 
+    font-size: 14px; 
     opacity: 0.8; 
     pointer-events: none;
+    text-align: center;
 }
 
 .coord-h { 
-    bottom: 2px; 
-    left: clamp(15px, 3vw, 30px); 
-    right: clamp(15px, 3vw, 30px); 
-    height: 20px;
-    width: min(85vw, 75vh);
-    justify-content: space-around; 
+    bottom: 5px; 
+    left: 30px; 
+    height: 25px;
+    width: min(75vw, 72vh);
+    grid-template-columns: repeat(8, 1fr);
     align-items: center;
 }
 
 .coord-v { 
-    left: 4px; 
-    top: clamp(15px, 3vw, 30px); 
-    bottom: clamp(15px, 3vw, 30px); 
-    width: 20px;
-    height: min(85vw, 75vh);
-    flex-direction: column; 
-    justify-content: space-around; 
+    left: 5px; 
+    top: 30px; 
+    width: 25px;
+    height: min(75vw, 72vh);
+    grid-template-rows: repeat(8, 1fr);
     align-items: center;
 }
 
@@ -403,8 +406,8 @@ main {
 aside { 
     position: fixed; 
     top: 0; 
-    left: -100%; 
-    width: min(340px, 100%); 
+    left: -350px; 
+    width: 340px; 
     height: 100%; 
     background: var(--panel); 
     transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); 
@@ -418,7 +421,12 @@ aside.open { left: 0; }
 .tabs { display: flex; background: #000; }
 .tabs button { flex: 1; padding: 12px; background: none; border: none; color: #555; cursor: pointer; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
 .tabs button.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
-.scroll-area { flex: 1; overflow-y: auto; padding: 15px; }
+
+.scroll-area { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 20px; 
+}
 
 /* Log de Movimentos */
 .log-entry {
@@ -466,14 +474,13 @@ aside.open { left: 0; }
 .overlay.show { display: flex; }
 
 .start-content {
-    width: min(640px, 90vw);
+    width: min(1000px, 95vw);
     max-height: 90vh;
-    overflow-y: auto;
     background: radial-gradient(circle at top left, rgba(25, 25, 35, 0.8), rgba(10, 10, 15, 0.95));
     border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 50px;
+    padding: 0;
     border-radius: 32px;
-    text-align: center;
+    display: flex;
     color: white;
     box-shadow: 
         0 30px 60px rgba(0,0,0,0.6), 
@@ -483,12 +490,37 @@ aside.open { left: 0; }
     animation: menuReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.start-info-col {
+    flex: 1;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.start-config-col {
+    flex: 1.3;
+    padding: 50px;
+    overflow-y: auto;
+    text-align: left;
+}
+
 @keyframes menuReveal {
     from { opacity: 0; transform: scale(0.95) translateY(20px); filter: blur(10px); }
     to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
 }
 
-.start-logo { width: 70px; margin-bottom: 14px; }
+ .start-logo { 
+    width: clamp(180px, 35vw, 350px); 
+    margin-bottom: 25px; 
+    filter: drop-shadow(0 10px 20px rgba(0, 229, 255, 0.2));
+    transition: transform 0.3s ease;
+ }
+ .start-logo:hover { transform: scale(1.05); }
+
 .start-content h1 { 
     margin: 0 0 5px;
     font-size: clamp(1.5rem, 5vw, 2.6rem);
@@ -555,6 +587,19 @@ aside.open { left: 0; }
 .config-row label { font-size: 12px; font-weight: 600; color: #ccc; }
 .config-row select { background: #15151e; border: 1px solid #333; color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; outline: none; min-width: 140px; cursor: pointer; transition: border-color 0.2s; }
 .config-row select:focus { border-color: var(--accent); }
+
+/* Novas classes para responsividade do Menu Inicial */
+.start-config-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    width: 100%;
+}
+
+.wall-preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; width: 100%; margin-top: 8px; }
 
 /* Estilo para Thumbnails de Wallpaper */
 .wp-thumbnail {
@@ -709,15 +754,15 @@ input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: 
         gap: 10px;
     }
 
-    .dashboard-center-group {
-        order: 3;
+    .dashboard-controls-left, .dashboard-battle-right {
         width: 100%;
         justify-content: center;
+        flex-wrap: wrap;
     }
 
     .player-card {
-        width: 100%;
-        justify-content: space-between;
+        width: auto;
+        justify-content: center;
     }
 
     .vs-text { display: none; }
@@ -730,18 +775,18 @@ input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: 
     }
 
     #board {
-        width: 92vw;
-        height: 92vw;
+        width: 85vw;
+        height: 85vw;
         border-width: 4px;
     }
 
     .board-wrapper {
-        padding: 20px;
+        padding: 30px;
     }
 
-    .coord-h, .coord-v { font-size: 10px; }
-    .coord-h { left: 22px; right: 22px; }
-    .coord-v { top: 22px; bottom: 22px; left: 5px; }
+    .coord-h, .coord-v { font-size: 11px; }
+    .coord-h { left: 30px; bottom: 5px; width: 85vw; }
+    .coord-v { top: 30px; left: 5px; height: 85vw; }
 
     .graveyard-container {
         width: 92vw;
@@ -768,6 +813,10 @@ input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: 
 
     .start-content h1 { font-size: 1.8rem; letter-spacing: 4px; }
     .theme-grid { grid-template-columns: 1fr; }
+
+    .start-content { flex-direction: column; overflow-y: auto; }
+    .start-info-col { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 30px; }
+    .start-config-col { padding: 30px; }
 
     .arena-fighters {
         flex-direction: column;

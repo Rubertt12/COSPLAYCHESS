@@ -19,62 +19,70 @@
 
 <div id="start-menu" class="overlay show">
     <div class="start-content">
-        <img src="img/favicon-Photoroom.png" alt="Rubra Studios Logo" class="start-logo">
-        <h1>COSPLAY CHESS</h1>
-        <p>Escolha um tema, valide as regras e inicie a partida com estilo.</p>
-        <div class="theme-grid">
-            <button class="theme-card selected" data-theme="default" onclick="setTheme('default')">
-                <strong>NEON</strong>
-                <span>Visual moderno e futurista</span>
-            </button>
-            <button class="theme-card" data-theme="forest" onclick="setTheme('forest')">
-                <strong>FLORESTA</strong>
-                <span>Verde suave para um clima natural</span>
-            </button>
-            <button class="theme-card" data-theme="fire" onclick="setTheme('fire')">
-                <strong>CHAMA</strong>
-                <span>Contraste quente e energético</span>
-            </button>
-            <button class="theme-card" data-theme="ice" onclick="setTheme('ice')">
-                <strong>GELADO</strong>
-                <span>Frio e limpo para partida tática</span>
-            </button>
+        <div class="start-info-col">
+            <img src="img/favicon-Photoroom.png" alt="Rubra Studios Logo" class="start-logo">
+            <h1>COSPLAY CHESS</h1>
+            <p>Escolha um tema, valide as regras e inicie a batalha.</p>
         </div>
-        <div style="display:flex; gap:8px; align-items:center; justify-content:center; margin-bottom:12px;">
-            <label style="font-size:12px;">Adversário:</label>
-            <select id="opponent-select" onchange="setMode(this.value)" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
-                <option value="LOCAL">Local (2 jogadores)</option>
-                <option value="AI">Máquina (vs AI)</option>
-            </select>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center; justify-content:center; margin-bottom:12px;">
-            <label style="font-size:12px;">Wallpaper:</label>
-            <input type="file" id="wallpaper-file" accept="image/*" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;" onchange="upWallpaper(this)">
-            <button class="btn" onclick="clearWallpaper()" style="background:#222; color:#fff; padding:6px;">Limpar</button>
-        </div>
-        <div style="width:100%; display:flex; flex-direction:column; gap:8px; align-items:center; margin-bottom:12px;">
-            <div style="font-size:12px; color:#ccc;">Ou escolha um preset:</div>
-            <div style="display:flex; gap:8px;">
-                <button id="wp1" class="wall-thumb" onclick="setWallpaperPreset('preset1')" style="width:120px; height:70px; background-color:#111; background-size:cover; border:1px solid #222; border-radius:6px; color:#fff; font-size:10px;">ANIME 1</button>
-                <button id="wp2" class="wall-thumb" onclick="setWallpaperPreset('preset2')" style="width:120px; height:70px; background-color:#111; background-size:cover; border:1px solid #222; border-radius:6px; color:#fff; font-size:10px;">ANIME 2</button>
-                <button id="wp3" class="wall-thumb" onclick="setWallpaperPreset('preset3')" style="width:120px; height:70px; background-color:#111; background-size:cover; border:1px solid #222; border-radius:6px; color:#fff; font-size:10px;">ANIME 3</button>
-                <button id="wp4" class="wall-thumb" onclick="setWallpaperPreset('preset4')" style="width:120px; height:70px; background-color:#111; background-size:cover; border:1px solid #222; border-radius:6px; color:#fff; font-size:10px;">ANIME 4</button>
+        <div class="start-config-col">
+            <div class="menu-section-title">ESTILO DO TABULEIRO</div>
+            <div class="theme-grid">
+                <button class="theme-card selected" data-theme="default" onclick="setTheme('default')">
+                    <strong>NEON</strong>
+                    <span>Visual moderno e futurista</span>
+                </button>
+                <button class="theme-card" data-theme="forest" onclick="setTheme('forest')">
+                    <strong>FLORESTA</strong>
+                    <span>Verde suave para um clima natural</span>
+                </button>
+                <button class="theme-card" data-theme="fire" onclick="setTheme('fire')">
+                    <strong>CHAMA</strong>
+                    <span>Contraste quente e energético</span>
+                </button>
+                <button class="theme-card" data-theme="ice" onclick="setTheme('ice')">
+                    <strong>GELADO</strong>
+                    <span>Frio e limpo para partida tática</span>
+                </button>
             </div>
-            <button class="btn" onclick="fetchRandomAnimeWallpaper()" style="width:100%; margin-top:8px; background:#1b1b2f; color:#fff;">BUSCAR WALLPAPER VIA API (ANIME)</button>
+            <div class="menu-section-title">CONFIGURAÇÕES DE JOGO</div>
+            <div class="start-config-row">
+                <label style="font-size:12px;">Adversário:</label>
+                <select id="opponent-select" onchange="setMode(this.value)" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
+                    <option value="LOCAL">Local (2 jogadores)</option>
+                    <option value="AI">Máquina (vs AI)</option>
+                </select>
+            </div>
+            <div class="start-config-row">
+                <label style="font-size:12px;">Wallpaper:</label>
+                <input type="file" id="wallpaper-file" accept="image/*" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;" onchange="upWallpaper(this)">
+                <button class="btn" onclick="clearWallpaper()" style="background:#222; color:#fff; padding:6px 12px; height:auto; width:auto; font-size:10px; letter-spacing:1px; border-radius:6px;">Limpar</button>
+            </div>
+            <div class="wall-preset-grid">
+                <button id="wp1" class="wall-thumb" onclick="setWallpaperPreset('naruto')">NARUTO</button>
+                <button id="wp2" class="wall-thumb" onclick="setWallpaperPreset('bleach')">BLEACH</button>
+                <button id="wp3" class="wall-thumb" onclick="setWallpaperPreset('onepiece')">ONE PIECE</button>
+                <button id="wp4" class="wall-thumb" onclick="setWallpaperPreset('kuroshitsuji')">KUROSHITSUJI</button>
+                <button id="wp5" class="wall-thumb" onclick="setWallpaperPreset('cyberpunk')">CYBERPUNK</button>
+                <button id="wp6" class="wall-thumb" onclick="setWallpaperPreset('sakura')">SAKURA</button>
+                <button id="wp7" class="wall-thumb" onclick="setWallpaperPreset('night_city')">NIGHT CITY</button>
+                <button id="wp8" class="wall-thumb" onclick="setWallpaperPreset('arena_sky')">ARENA SKY</button>
+            </div>
+            <button class="btn" onclick="randomWallpaperPreset()" style="width:100%; margin-top:8px; background:#1b1b2f; color:#fff; font-size:10px;">WALLPAPER ALEATÓRIO</button>
+            
+            <div id="ai-options" class="start-config-row" style="display:none; margin-top:15px;">
+                <label style="font-size:12px;">Lado da IA:</label>
+                <select id="ai-side" onchange="setAISide(this.value)" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
+                    <option value="P">PRETAS</option>
+                    <option value="B">BRANCAS</option>
+                </select>
+                <label style="font-size:12px; margin-left:8px;">Dificuldade:</label>
+                <select id="ai-diff" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
+                    <option value="easy">Fácil</option>
+                    <option value="normal" selected>Médio</option>
+                </select>
+            </div>
+            <button class="btn btn-yes" onclick="startBattle()" id="start-game-btn" style="margin-top:30px;">INICIAR JOGO</button>
         </div>
-        <div id="ai-options" style="display:none; margin-bottom:12px; text-align:center; gap:8px;">
-            <label style="font-size:12px;">Lado da IA:</label>
-            <select id="ai-side" onchange="setAISide(this.value)" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
-                <option value="P">PRETAS</option>
-                <option value="B">BRANCAS</option>
-            </select>
-            <label style="font-size:12px; margin-left:8px;">Dificuldade:</label>
-            <select id="ai-diff" style="padding:6px; border-radius:4px; background:#0b0b0d; color:white; border:1px solid #222;">
-                <option value="easy">Fácil</option>
-                <option value="normal" selected>Médio</option>
-            </select>
-        </div>
-        <button class="btn btn-yes" onclick="startBattle()" id="start-game-btn">INICIAR JOGO</button>
     </div>
 </div>
 
@@ -138,8 +146,8 @@
 <div class="app-container">
     <div id="dashboard">
 
-        <div class="dashboard-center-group">
-            <!-- NOVOS CONTROLES DE VOLUME RÁPIDO -->
+        <!-- LADO ESQUERDO: CONTROLES DE SOM -->
+        <div class="dashboard-controls-left">
             <div class="dash-controls">
                 <div class="ctrl-group">
                     <button class="dash-btn" onclick="document.getElementById('f-amb-dash').click()" title="Subir Áudio">📁</button>
@@ -147,31 +155,37 @@
                     <button class="dash-btn" onclick="stopWithFade('Ambiente')" title="Pause">⏸</button>
                     <button class="dash-btn" onclick="pauseGame()" title="Pausar Partida / Configurações" style="margin-left: 10px; border-color: var(--accent); color: var(--accent); font-size: 8px; width: auto; padding: 0 8px;">⏸ PAUSA</button>
                 </div>
+                <div class="ctrl-group">
                     <span class="ctrl-label">MASTER</span>
                     <input type="range" id="v-master-dash" min="0" max="1" step="0.1" value="1" oninput="syncVolumes('master', this.value)">
                 </div>
+            </div>
+            <div class="dash-controls">
                 <div class="ctrl-group">
                     <span class="ctrl-label">AMB</span>
                     <input type="range" id="v-ambient-dash" min="0" max="1" step="0.1" value="0.7" oninput="syncVolumes('ambient', this.value)">
-
                     <input type="file" id="f-amb-dash" style="display:none" onchange="upAmb('Ambiente', this)">
-                <div id="card-B" class="player-card">
-                    <div id="img-B" class="p-img" onclick="document.getElementById('f-av-B').click()" title="Mudar Avatar"></div>
-                    <input type="file" id="f-av-B" style="display:none" onchange="upAvatar('B', this)">
-                    <input type="text" id="name-B" value="Jogador 1" class="player-name-input" style="color:#00e5ff">
-                    <div id="score-B" class="p-score">0</div>
-                </div>
-                <div class="vs-text">V S</div>
-                <div id="card-P" class="player-card" style="flex-direction: row-reverse; text-align: right;">
-                    <div id="img-P" class="p-img" onclick="document.getElementById('f-av-P').click()" title="Mudar Avatar"></div>
-                    <input type="text" id="name-P" value="Jogador 2" class="player-name-input" style="color:var(--danger); text-align: right;">
-                    <div id="score-P" class="p-score" style="color:var(--danger)">0</div>
-                    <input type="file" id="f-av-P" style="display:none" onchange="upAvatar('P', this)">
                 </div>
             </div>
-                </div>
-            </div>
+        </div>
 
+        <!-- LADO DIREITO: INFORMAÇÕES DA BATALHA -->
+        <div class="dashboard-battle-right">
+            <div id="card-B" class="player-card">
+                <div id="img-B" class="p-img" onclick="document.getElementById('f-av-B').click()" title="Mudar Avatar"></div>
+                <input type="text" id="name-B" value="Jogador 1" class="player-name-input" style="color:#00e5ff">
+                <div id="score-B" class="p-score" style="color:#00e5ff">0</div>
+                <input type="file" id="f-av-B" style="display:none" onchange="upAvatar('B', this)">
+            </div>
+            <div class="vs-text">V S</div>
+            <div id="card-P" class="player-card">
+                <div id="score-P" class="p-score" style="color:var(--danger)">0</div>
+                <input type="text" id="name-P" value="Jogador 2" class="player-name-input" style="color:var(--danger); text-align: right;">
+                <div id="img-P" class="p-img" onclick="document.getElementById('f-av-P').click()" title="Mudar Avatar"></div>
+                <input type="file" id="f-av-P" style="display:none" onchange="upAvatar('P', this)">
+            </div>
+        </div>
+    </div>
 
     <main>
         <div class="board-wrapper">
