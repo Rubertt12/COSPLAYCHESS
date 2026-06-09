@@ -26,7 +26,7 @@
 O **Cosplay Chess** redefine a interação em palco. Desenvolvido para ser o coração técnico de apresentações de cosplay, ele remove a frieza do xadrez tradicional e entrega uma interface viva, responsiva e totalmente customizável.
 
 ### 🌑 Estética "Glassmorphism"
-Interface baseada no **macOS Sequoia**, utilizando filtros de desfoque de fundo (*backdrop-filters*), bordas neon sutis e tipografia futurista. Cada janela e menu foi desenhado para não apenas funcionar, mas impressionar o público.
+utilizando filtros de desfoque de fundo (*backdrop-filters*), bordas neon sutis e tipografia futurista. Cada janela e menu foi desenhado para não apenas funcionar, mas impressionar o público.
 
 ### 🔊 Core de Áudio Inteligente
 * **Dual-Channel Arena:** Controle de áudio independente para o Atacante e o Defensor.
