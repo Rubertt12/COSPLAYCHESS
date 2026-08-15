@@ -37,17 +37,78 @@ photoInput.addEventListener('change',async()=>{
   catch{ status('Não foi possível processar essa imagem.','error'); }
 });
 
+function participantPayload(data){
+  return {
+    fullName:data.fullName,
+    nick:data.nick,
+    email:data.email,
+    whatsapp:data.whatsapp,
+    city:data.city,
+    age:data.age,
+    chessLevel:data.chessLevel,
+    participationType:data.participationType,
+    sidePreference:data.sidePreference,
+    characterName:data.characterName,
+    notes:data.notes
+  };
+}
+
+async function sendRegistration(eventId, participant){
+  const response=await fetch(`${cfg.functionsBase}/cosplaychess-register`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':cfg.supabaseKey},
+    body:JSON.stringify({eventId,participant,photo:{dataUrl:photoDataUrl}})
+  });
+  const result=await response.json();
+  return {response,result};
+}
+
+function nextEventPrompt(nextEvent, limit){
+  const when=nextEvent?.start_at
+    ? new Date(nextEvent.start_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})
+    : '';
+  return `As ${limit||32} vagas deste evento já foram preenchidas.\n\nQuer se inscrever na próxima edição${nextEvent?.title?` — ${nextEvent.title}`:''}${when?` (${when})`:''}?`;
+}
+
 form.addEventListener('submit',async e=>{
   e.preventDefault();
   if(!photoDataUrl){ status('Escolha uma foto do personagem.','error'); return; }
   const button=document.getElementById('submitButton'); button.disabled=true; status('Enviando inscrição...');
   const data=Object.fromEntries(new FormData(form));
+  const participant=participantPayload(data);
+
   try{
-    const response=await fetch(`${cfg.functionsBase}/cosplaychess-register`,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseKey},body:JSON.stringify({eventId:data.eventId,participant:{fullName:data.fullName,nick:data.nick,email:data.email,whatsapp:data.whatsapp,city:data.city,age:data.age,chessLevel:data.chessLevel,participationType:data.participationType,sidePreference:data.sidePreference,characterName:data.characterName,notes:data.notes},photo:{dataUrl:photoDataUrl}})});
-    const result=await response.json(); if(!response.ok) throw new Error(result.error||'Erro ao enviar inscrição.');
-    status(result.message,'success'); form.reset(); preview.style.backgroundImage=''; preview.textContent='Prévia da foto'; photoDataUrl='';
-  }catch(err){ status(err.message||String(err),'error'); }
-  finally{ button.disabled=false; }
+    let {response,result}=await sendRegistration(data.eventId,participant);
+
+    if(!response.ok && result.code==='EVENT_FULL'){
+      if(!result.nextEvent){
+        status(`As ${result.limit||32} vagas deste evento já foram preenchidas. A próxima edição ainda não está com inscrições abertas.`, 'error');
+        return;
+      }
+
+      const wantsNext=confirm(nextEventPrompt(result.nextEvent,result.limit));
+      if(!wantsNext){
+        status(`As ${result.limit||32} vagas deste evento já foram preenchidas. Sua inscrição não foi enviada.`, 'error');
+        return;
+      }
+
+      if([...eventSelect.options].some(o=>o.value===result.nextEvent.id)) eventSelect.value=result.nextEvent.id;
+      status(`Enviando sua inscrição para ${result.nextEvent.title}...`);
+      ({response,result}=await sendRegistration(result.nextEvent.id,participant));
+    }
+
+    if(!response.ok) throw new Error(result.error||'Erro ao enviar inscrição.');
+
+    status(result.message,'success');
+    form.reset();
+    preview.style.backgroundImage='';
+    preview.textContent='Prévia da foto';
+    photoDataUrl='';
+  }catch(err){
+    status(err.message||String(err),'error');
+  }finally{
+    button.disabled=false;
+  }
 });
 
 loadEvents();
