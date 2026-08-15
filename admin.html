@@ -39,13 +39,14 @@
         <form id="loginForm" class="stack" autocomplete="on">
           <label>
             <span>E-mail</span>
-            <input type="email" name="email" required autocomplete="email" placeholder="seuemail@exemplo.com">
+            <input type="email" name="email" required autocomplete="email" value="cosplaychess@outlook.com" placeholder="seuemail@exemplo.com">
           </label>
           <label>
             <span>Senha</span>
             <input type="password" name="password" required autocomplete="current-password" placeholder="Sua senha">
           </label>
           <button class="btn gold" type="submit">Entrar no painel</button>
+          <button id="forgotPasswordBtn" class="btn ghost" type="button">Esqueci minha senha</button>
         </form>
 
         <form id="bootstrapForm" class="stack" hidden autocomplete="on">
@@ -67,6 +68,19 @@
             <input name="bootstrapCode" required autocomplete="off" placeholder="Código de ativação">
           </label>
           <button class="btn gold" type="submit">Criar administrador</button>
+        </form>
+
+        <form id="recoveryForm" class="stack" hidden autocomplete="on">
+          <p class="hint">Link de recuperação validado. Defina uma nova senha para o painel administrativo.</p>
+          <label>
+            <span>Nova senha</span>
+            <input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Nova senha">
+          </label>
+          <label>
+            <span>Confirmar nova senha</span>
+            <input type="password" name="confirmPassword" minlength="8" required autocomplete="new-password" placeholder="Repita a nova senha">
+          </label>
+          <button class="btn gold" type="submit">Salvar nova senha</button>
         </form>
 
         <div id="authStatus" class="form-status" aria-live="polite"></div>
