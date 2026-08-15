@@ -18,9 +18,13 @@ async function loadEvents(){
 
 async function loadGallery(){
   const grid=document.getElementById('galleryGrid');
-  const {data,error}=await db.from('cosplay_event_photos').select('id,photo_url,caption,event_id,cosplay_events!inner(title,published)').eq('cosplay_events.published',true).order('created_at',{ascending:false}).limit(12);
+  const {data:events,error:eventError}=await db.from('cosplay_events').select('id,title').eq('published',true);
+  if(eventError||!events?.length){ grid.innerHTML='<div class="empty-card">As fotos publicadas pelo admin aparecerão aqui.</div>'; return; }
+  const eventIds=events.map(event=>event.id);
+  const eventNames=new Map(events.map(event=>[event.id,event.title]));
+  const {data,error}=await db.from('cosplay_event_photos').select('id,photo_url,caption,event_id,created_at').in('event_id',eventIds).order('created_at',{ascending:false}).limit(12);
   if(error||!data?.length){ grid.innerHTML='<div class="empty-card">As fotos publicadas pelo admin aparecerão aqui.</div>'; return; }
-  grid.innerHTML=data.map(photo=>`<figure class="gallery-item"><img src="${esc(photo.photo_url)}" alt="${esc(photo.caption||photo.cosplay_events?.title||'CosplayChess')}"><figcaption><b>${esc(photo.cosplay_events?.title||'CosplayChess')}</b><span>${esc(photo.caption||'Registro da arena')}</span></figcaption></figure>`).join('');
+  grid.innerHTML=data.map(photo=>`<figure class="gallery-item"><img src="${esc(photo.photo_url)}" alt="${esc(photo.caption||eventNames.get(photo.event_id)||'CosplayChess')}"><figcaption><b>${esc(eventNames.get(photo.event_id)||'CosplayChess')}</b><span>${esc(photo.caption||'Registro da arena')}</span></figcaption></figure>`).join('');
 }
 
 loadEvents(); loadGallery();
