@@ -13,7 +13,7 @@ async function loadEvents(){
   const {data,error}=await db.from('cosplay_events').select('id,title,start_at,venue,city,registration_open').eq('published',true).order('start_at');
   if(error){ eventSelect.innerHTML='<option value="">Erro ao carregar eventos</option>'; return; }
   const open=(data||[]).filter(e=>e.registration_open);
-  eventSelect.innerHTML='<option value="">Selecione um evento</option>'+open.map(e=>`<option value="${e.id}">${e.title} — ${new Date(e.start_at).toLocaleDateString('pt-BR')}</option>`).join('');
+  eventSelect.innerHTML='<option value="">Selecione um evento</option>'+open.map(e=>`<option value="${e.id}">${e.title} — ${new Date(e.start_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</option>`).join('');
   const selected=new URLSearchParams(location.search).get('event');
   if(selected && open.some(e=>e.id===selected)) eventSelect.value=selected;
 }
@@ -43,7 +43,7 @@ form.addEventListener('submit',async e=>{
   const button=document.getElementById('submitButton'); button.disabled=true; status('Enviando inscrição...');
   const data=Object.fromEntries(new FormData(form));
   try{
-    const response=await fetch(`${cfg.functionsBase}/cosplaychess-register`,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseKey},body:JSON.stringify({eventId:data.eventId,participant:{fullName:data.fullName,nick:data.nick,email:data.email,whatsapp:data.whatsapp,city:data.city,age:data.age,chessLevel:data.chessLevel,participationType:data.participationType,sidePreference:data.sidePreference,availability:data.availability,characterName:data.characterName,notes:data.notes},photo:{dataUrl:photoDataUrl}})});
+    const response=await fetch(`${cfg.functionsBase}/cosplaychess-register`,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.supabaseKey},body:JSON.stringify({eventId:data.eventId,participant:{fullName:data.fullName,nick:data.nick,email:data.email,whatsapp:data.whatsapp,city:data.city,age:data.age,chessLevel:data.chessLevel,participationType:data.participationType,sidePreference:data.sidePreference,characterName:data.characterName,notes:data.notes},photo:{dataUrl:photoDataUrl}})});
     const result=await response.json(); if(!response.ok) throw new Error(result.error||'Erro ao enviar inscrição.');
     status(result.message,'success'); form.reset(); preview.style.backgroundImage=''; preview.textContent='Prévia da foto'; photoDataUrl='';
   }catch(err){ status(err.message||String(err),'error'); }
