@@ -138,6 +138,44 @@ body.admin-page {
   border-color: rgba(255,255,255,.10);
 }
 
+.admin-page .password-field {
+  position: relative;
+  display: block;
+}
+
+.admin-page .password-field input {
+  width: 100%;
+  padding-right: 48px !important;
+}
+
+.admin-page .password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #c9b795;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  opacity: .78;
+  transition: .18s ease;
+}
+
+.admin-page .password-toggle:hover,
+.admin-page .password-toggle:focus-visible {
+  opacity: 1;
+  background: rgba(224, 190, 119, .08);
+  outline: none;
+}
+
 .admin-page .auth-card .stack .btn {
   min-height: 50px;
   margin-top: 4px;
