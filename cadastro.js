@@ -5,6 +5,8 @@ const eventSelect = document.getElementById('eventSelect');
 const statusBox = document.getElementById('formStatus');
 const photoInput = document.getElementById('characterPhoto');
 const preview = document.getElementById('photoPreview');
+const piecePreference = document.getElementById('piecePreference');
+const secondPiecePreference = document.getElementById('secondPiecePreference');
 let photoDataUrl = '';
 
 function status(message, type=''){ statusBox.className=`form-status ${type}`; statusBox.textContent=message; }
@@ -37,6 +39,15 @@ photoInput.addEventListener('change',async()=>{
   catch{ status('Não foi possível processar essa imagem.','error'); }
 });
 
+function syncSecondPieceOptions(){
+  const primary=piecePreference.value;
+  [...secondPiecePreference.options].forEach(option=>{
+    option.disabled=Boolean(primary && option.value===primary && primary!=='Sem preferência');
+  });
+  if(secondPiecePreference.selectedOptions[0]?.disabled) secondPiecePreference.value='Sem segunda preferência';
+}
+piecePreference.addEventListener('change',syncSecondPieceOptions);
+
 function participantPayload(data){
   return {
     fullName:data.fullName,
@@ -48,6 +59,8 @@ function participantPayload(data){
     chessLevel:data.chessLevel,
     participationType:data.participationType,
     sidePreference:data.sidePreference,
+    piecePreference:data.piecePreference,
+    secondPiecePreference:data.secondPiecePreference,
     characterName:data.characterName,
     notes:data.notes
   };
@@ -75,6 +88,10 @@ form.addEventListener('submit',async e=>{
   if(!photoDataUrl){ status('Escolha uma foto do personagem.','error'); return; }
   const button=document.getElementById('submitButton'); button.disabled=true; status('Enviando inscrição...');
   const data=Object.fromEntries(new FormData(form));
+  if(!data.piecePreference){ button.disabled=false; status('Escolha qual peça você quer ser.','error'); return; }
+  if(data.secondPiecePreference===data.piecePreference && data.piecePreference!=='Sem preferência'){
+    button.disabled=false; status('A segunda preferência precisa ser diferente da primeira.','error'); return;
+  }
   const participant=participantPayload(data);
 
   try{
@@ -101,6 +118,7 @@ form.addEventListener('submit',async e=>{
 
     status(result.message,'success');
     form.reset();
+    syncSecondPieceOptions();
     preview.style.backgroundImage='';
     preview.textContent='Prévia da foto';
     photoDataUrl='';
