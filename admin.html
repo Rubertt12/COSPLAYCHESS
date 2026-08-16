@@ -43,7 +43,7 @@
           </label>
           <label>
             <span>Senha</span>
-            <input type="password" name="password" required autocomplete="current-password" placeholder="Sua senha">
+            <span class="password-field"><input type="password" name="password" required autocomplete="current-password" placeholder="Sua senha"><button class="password-toggle" type="button" aria-label="Mostrar senha" title="Mostrar senha">👁</button></span>
           </label>
           <button class="btn gold" type="submit">Entrar no painel</button>
           <button id="forgotPasswordBtn" class="btn ghost" type="button">Esqueci minha senha</button>
@@ -61,7 +61,7 @@
           </label>
           <label>
             <span>Senha</span>
-            <input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Mínimo de 8 caracteres">
+            <span class="password-field"><input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Mínimo de 8 caracteres"><button class="password-toggle" type="button" aria-label="Mostrar senha" title="Mostrar senha">👁</button></span>
           </label>
           <label>
             <span>Código de primeiro acesso</span>
@@ -74,11 +74,11 @@
           <p class="hint">Link de recuperação validado. Defina uma nova senha para o painel administrativo.</p>
           <label>
             <span>Nova senha</span>
-            <input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Nova senha">
+            <span class="password-field"><input type="password" name="password" minlength="8" required autocomplete="new-password" placeholder="Nova senha"><button class="password-toggle" type="button" aria-label="Mostrar senha" title="Mostrar senha">👁</button></span>
           </label>
           <label>
             <span>Confirmar nova senha</span>
-            <input type="password" name="confirmPassword" minlength="8" required autocomplete="new-password" placeholder="Repita a nova senha">
+            <span class="password-field"><input type="password" name="confirmPassword" minlength="8" required autocomplete="new-password" placeholder="Repita a nova senha"><button class="password-toggle" type="button" aria-label="Mostrar senha" title="Mostrar senha">👁</button></span>
           </label>
           <button class="btn gold" type="submit">Salvar nova senha</button>
         </form>
@@ -165,5 +165,17 @@
   <script src="./admin.js"></script>
   <script src="./admin-emergency-reset.js"></script>
   <script src="./admin-gallery.js"></script>
+  <script>
+    document.querySelectorAll('.password-toggle').forEach(button => {
+      button.addEventListener('click', () => {
+        const input = button.parentElement.querySelector('input');
+        const showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        button.textContent = showing ? '👁' : '🙈';
+        button.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
+        button.setAttribute('title', showing ? 'Mostrar senha' : 'Ocultar senha');
+      });
+    });
+  </script>
 </body>
 </html>
