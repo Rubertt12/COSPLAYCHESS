@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0b0710">
-  <meta name="description" content="CosplayChess — xadrez, cosplay e performance em uma arena ao vivo.">
+  <meta name="description" content="CosplayChess — xadrez, cosplay e performance em um espetáculo ao vivo.">
   <title>CosplayChess — O tabuleiro virou palco</title>
   <link rel="icon" href="./img/favicon-Photoroom.png">
   <link rel="stylesheet" href="./landing.css">
+  <link rel="stylesheet" href="./community.css">
   <style>
     @media (max-width: 760px){
       .topbar{height:auto;min-height:82px;padding:12px 20px;gap:12px;flex-wrap:wrap}
@@ -33,8 +34,8 @@
   <div class="grain"></div>
   <header class="topbar">
     <a class="brand" href="#topo"><img src="./img/fergorverse-logo.webp" alt="Fergorverse"><span><b>COSPLAY</b><em>CHESS</em></span></a>
-    <nav><a href="#eventos">Eventos</a><a href="#experiencia">Experiência</a><a href="#galeria">Galeria</a><a href="./cadastro.html">Inscrição</a></nav>
-    <div class="top-actions"><a class="btn ghost" href="./admin.html">Admin</a><a class="btn gold" href="./cadastro.html">Entrar na arena</a></div>
+    <nav><a href="#eventos">Eventos</a><a href="#experiencia">Experiência</a><a href="#galeria">Galeria</a><a href="./universo.html">Universo</a><a href="./ranking.html">Ranking</a></nav>
+    <div class="top-actions"><a class="btn ghost" href="./admin.html">Admin</a><a class="btn gold" href="./cadastro.html">Faça parte do Espetáculo!</a></div>
   </header>
 
   <main id="topo">
@@ -43,13 +44,13 @@
         <span class="kicker">♜ XADREZ • COSPLAY • PERFORMANCE</span>
         <h1>Um tabuleiro.<br><i>Trinta e duas histórias.</i></h1>
         <p>O CosplayChess transforma cada peça em personagem e cada movimento em cena. Escolha seu evento, inscreva seu cosplay e entre para o elenco da próxima batalha.</p>
-        <div class="hero-actions"><a class="btn gold big" href="#eventos">Ver próximos eventos</a><a class="btn dark big" href="./cadastro.html">Quero participar</a></div>
+        <div class="hero-actions"><a class="btn gold big" href="#eventos">Ver próximos eventos</a><a class="btn dark big" href="./cadastro.html">Entrar no tabuleiro</a></div>
         <div class="hero-meta"><div><b>20 / 24 / 32</b><span>formações de elenco</span></div><div><b>AO VIVO</b><span>palco + telão</span></div><div><b>FICHA DIGITAL</b><span>foto e personagem</span></div></div>
       </div>
       <div class="hero-art">
         <div class="ornament">✦</div>
         <img src="./img/favicon-Photoroom.png" alt="Logo Fergorverse CosplayChess" decoding="async">
-        <div class="crest-caption"><small>FERGORVERSE PRESENTS</small><b>COSPLAY CHESS</b><span>Arena de personagens</span></div>
+        <div class="crest-caption"><small>FERGORVERSE PRESENTS</small><b>COSPLAY CHESS</b><span>Espetáculo de personagens</span></div>
       </div>
     </section>
 
@@ -60,7 +61,7 @@
 
     <section class="section dark-section" id="experiencia">
       <div class="shell experience-grid">
-        <div><span class="kicker">A ARENA</span><h2>O xadrez vira <i>espetáculo.</i></h2><p>O operador controla formação, personagens, trilhas e confrontos enquanto o público acompanha a partida no telão.</p></div>
+        <div><span class="kicker">O ESPETÁCULO</span><h2>O xadrez vira <i>espetáculo.</i></h2><p>O operador controla formação, personagens, trilhas e confrontos enquanto o público acompanha a partida no telão.</p></div>
         <div class="feature-grid">
           <article><b>01</b><h3>Elenco real</h3><p>Inscritos entram no app com personagem e foto.</p></article>
           <article><b>02</b><h3>Setup rápido</h3><p>Músicas faltantes podem ser distribuídas automaticamente.</p></article>
@@ -71,13 +72,27 @@
     </section>
 
     <section class="section shell" id="galeria">
-      <div class="section-head"><div><span class="kicker">REGISTROS DA ARENA</span><h2>Galeria <i>Fergorverse</i></h2></div></div>
+      <div class="section-head"><div><span class="kicker">REGISTROS DO ESPETÁCULO</span><h2>Galeria <i>Fergorverse</i></h2></div></div>
       <div id="galleryGrid" class="gallery-grid"><div class="empty-card">As fotos publicadas pelo admin aparecerão aqui.</div></div>
+    </section>
+
+    <section class="section shell" id="universo">
+      <div class="universe-intro"><div><span class="kicker">CONHEÇA O UNIVERSO FERGORVERSE</span><h2>As pessoas por trás do <i>tabuleiro.</i></h2></div><p>O CosplayChess também é feito por quem organiza, cria, desenvolve e mantém o projeto em movimento. Conheça o time e acompanhe a história que cada evento deixa para trás.</p></div>
+      <div class="team-grid" data-team-grid><div class="empty-card">Carregando equipe...</div></div>
+      <div class="home-universe-card">
+        <span class="kicker">HISTÓRIA VIVA</span>
+        <div class="universe-links">
+          <a class="universe-link" href="./hall-da-fama.html"><span class="icon">👑</span><b>Hall da Fama</b><p>Veja os personagens e cosplayers que venceram cada partida.</p></a>
+          <a class="universe-link" href="./ranking.html"><span class="icon">♜</span><b>Ranking</b><p>Capturas, partidas, mortes, sobrevivências e vitórias.</p></a>
+          <a class="universe-link" href="./conquistas.html"><span class="icon">🏆</span><b>Conquistas</b><p>Troféus e achievements desbloqueados no CosplayChess.</p></a>
+        </div>
+        <div class="community-nav"><a class="btn gold big" href="./universo.html">Conheça o universo Fergorverse</a></div>
+      </div>
     </section>
 
     <section class="section shell final-cta">
       <div><span class="kicker">A PRÓXIMA PEÇA PODE SER VOCÊ</span><h2>Escolha seu personagem.<br><i>Entre no tabuleiro.</i></h2></div>
-      <a class="btn gold big" href="./cadastro.html">Fazer inscrição</a>
+      <a class="btn gold big" href="./cadastro.html">Faça parte do Espetáculo!</a>
     </section>
   </main>
 
@@ -86,5 +101,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
   <script src="./landing.js"></script>
+  <script src="./community.js"></script>
 </body>
 </html>
