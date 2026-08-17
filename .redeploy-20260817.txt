@@ -1,0 +1,1 @@
+Força novo deploy de produção do CosplayChess em 17/08/2026.
