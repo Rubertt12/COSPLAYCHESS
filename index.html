@@ -10,14 +10,32 @@
   <link rel="stylesheet" href="./landing.css">
   <link rel="stylesheet" href="./community.css">
   <style>
+    .site-footer{margin-top:20px;border-top:1px solid rgba(255,255,255,.07);background:linear-gradient(180deg,rgba(255,255,255,.015),rgba(0,0,0,.18))}
+    .footer-main{display:grid;grid-template-columns:1.35fr .8fr .8fr;gap:60px;padding:44px 0 34px}
+    .footer-brand{display:grid;gap:15px;align-content:start}
+    .footer-brand .brand{width:max-content}
+    .footer-copy{margin:0;max-width:430px;color:#827b86;font-size:11px;line-height:1.75}
+    .footer-column{display:grid;align-content:start;gap:10px}
+    .footer-title{margin-bottom:5px;color:#d4aa5c;font-size:9px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase}
+    .footer-column a{width:max-content;color:#9a929e;text-decoration:none;font-size:11px;transition:.2s}
+    .footer-column a:hover{color:#f0d18c;transform:translateX(2px)}
+    .footer-bottom{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 0 28px;border-top:1px solid rgba(255,255,255,.055);color:#655f69;font-size:9px}
+    .footer-bottom p{margin:0}
+    .footer-admin{display:inline-flex;align-items:center;gap:6px;color:#5d5761!important;text-decoration:none;font-size:9px!important;letter-spacing:.4px;opacity:.55;transition:.2s}
+    .footer-admin:before{content:'⚙';font-size:9px}
+    .footer-admin:hover{color:#9c94a3!important;opacity:1}
+    .footer-top{color:#7b747f!important;text-decoration:none;font-size:9px!important}
+    .footer-top:hover{color:#d4aa5c!important}
     @media (max-width: 760px){
       .topbar{height:auto;min-height:82px;padding:12px 20px;gap:12px;flex-wrap:wrap}
       .topbar nav{display:none}
       .top-actions{margin-left:auto;display:flex!important;gap:8px;flex-wrap:nowrap}
-      .top-actions .btn.ghost{display:inline-flex!important;padding:10px 12px;font-size:10px}
       .top-actions .btn.gold{padding:10px 12px;font-size:10px;white-space:nowrap}
       .brand img{width:46px;height:46px}
       .brand span{letter-spacing:2px}
+      .footer-main{grid-template-columns:1fr 1fr;gap:34px 26px;padding:36px 0 28px}
+      .footer-brand{grid-column:1/-1}
+      .footer-copy{max-width:560px}
     }
     @media (max-width: 430px){
       .topbar{padding:10px 14px}
@@ -27,6 +45,10 @@
       .brand em{font-size:9px}
       .top-actions{width:100%;margin-left:0}
       .top-actions .btn{flex:1}
+      .footer-main{grid-template-columns:1fr;gap:28px;padding:32px 0 24px}
+      .footer-brand{grid-column:auto}
+      .footer-bottom{align-items:flex-start;flex-wrap:wrap;padding-bottom:24px}
+      .footer-bottom p{width:100%}
     }
   </style>
 </head>
@@ -35,7 +57,7 @@
   <header class="topbar">
     <a class="brand" href="#topo"><img src="./img/fergorverse-logo.webp" alt="Fergorverse"><span><b>COSPLAY</b><em>CHESS</em></span></a>
     <nav><a href="#eventos">Eventos</a><a href="#experiencia">Experiência</a><a href="#galeria">Galeria</a><a href="./universo.html">Universo</a><a href="./ranking.html">Ranking</a></nav>
-    <div class="top-actions"><a class="btn ghost" href="./admin.html">Admin</a><a class="btn gold" href="./cadastro.html">Faça parte do Espetáculo!</a></div>
+    <div class="top-actions"><a class="btn gold" href="./cadastro.html">Faça parte do Espetáculo!</a></div>
   </header>
 
   <main id="topo">
@@ -96,7 +118,33 @@
     </section>
   </main>
 
-  <footer class="footer shell"><div class="brand mini"><img src="./img/fergorverse-logo.webp" alt=""><span><b>COSPLAY</b><em>CHESS</em></span></div><p>Fergorverse • CosplayChess</p><a href="#topo">Voltar ao topo ↑</a></footer>
+  <footer class="site-footer">
+    <div class="footer-main shell">
+      <div class="footer-brand">
+        <a class="brand mini" href="#topo"><img src="./img/fergorverse-logo.webp" alt="Fergorverse"><span><b>COSPLAY</b><em>CHESS</em></span></a>
+        <p class="footer-copy">Xadrez, cosplay e performance transformados em um espetáculo ao vivo. Cada peça tem um personagem. Cada movimento vira cena.</p>
+      </div>
+      <nav class="footer-column" aria-label="Navegação do rodapé">
+        <span class="footer-title">Explore</span>
+        <a href="#eventos">Próximos eventos</a>
+        <a href="#experiencia">A experiência</a>
+        <a href="#galeria">Galeria</a>
+        <a href="./cadastro.html">Participar</a>
+      </nav>
+      <nav class="footer-column" aria-label="Universo Fergorverse">
+        <span class="footer-title">Fergorverse</span>
+        <a href="./universo.html">Universo</a>
+        <a href="./ranking.html">Ranking</a>
+        <a href="./hall-da-fama.html">Hall da Fama</a>
+        <a href="./conquistas.html">Conquistas</a>
+      </nav>
+    </div>
+    <div class="footer-bottom shell">
+      <p>© 2026 Fergorverse • CosplayChess</p>
+      <a class="footer-top" href="#topo">Voltar ao topo ↑</a>
+      <a class="footer-admin" href="./admin.html" aria-label="Acesso administrativo">Admin</a>
+    </div>
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
@@ -104,4 +152,4 @@
   <script src="./community.js"></script>
 </body>
 </html>
-<!-- redeploy: 2026-08-17T11:42:00-03:00 -->
+<!-- footer reorganizada: 2026-08-21 -->
